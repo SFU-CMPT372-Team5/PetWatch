@@ -1,0 +1,2 @@
+.vue files in this folder will become pages located at /vue_file_name.html
+(ex, index.vue will become index.html)

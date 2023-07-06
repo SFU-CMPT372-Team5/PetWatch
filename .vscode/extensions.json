@@ -1,0 +1,4 @@
+{
+    "recommendations": ["vue.volar"],
+    "unwantedRecommendations": ["vscode.typescript-language-features"]
+}
