@@ -70,21 +70,21 @@ export default {
         return {
             //possible account attributes
             account: {
-                "username": "User1",
-                "password": "pass",
-                "info": {
-                    "email": "user1@petwatch.com",
-                    "address": "12345 10st",
-                    "dateCreated": "November 10",
+                username: "User1",
+                password: "pass",
+                info: {
+                    email: "user1@petwatch.com",
+                    address: "12345 10st",
+                    dateCreated: "November 10",
                 }
 
             },
             pets: [
                 {
-                    "name": "Dog1"
+                    name: "Dog1"
                 },
                 {
-                    "name": "Dog2"
+                    name: "Dog2"
                 }
             ]
         }
