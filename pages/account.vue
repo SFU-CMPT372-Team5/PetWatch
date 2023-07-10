@@ -15,20 +15,12 @@
 
                             <v-spacer></v-spacer>
 
-                            <v-menu>
-                                <template v-slot:activator="{ props }">
 
-                                    <v-btn icon="mdi-dots-vertical" v-bind="props"></v-btn>
-                                </template>
 
-                                <v-list>
 
-                                    <v-list-item v-for="(item, i) in items" :key="i">
+                            <v-btn @click="openSettings">Settings</v-btn>
 
-                                        <v-list-item-title>{{ item }}</v-list-item-title>
-                                    </v-list-item>
-                                </v-list>
-                            </v-menu>
+
                         </v-card-title>
 
 
@@ -72,11 +64,11 @@
     </VSheet>
 </template>
 
-<script >
+<script lang="ts">
 export default {
     data() {
         return {
-            items: ["Settings", "Delete Account"],
+            //possible account attributes
             account: {
                 "username": "User1",
                 "password": "pass",
@@ -100,14 +92,17 @@ export default {
 
     methods: {
         //temp function to nicely display info labels from account information
-        formatLabel(string) {
+        formatLabel(string: String) {
             string = string.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
             string = string.charAt(0).toUpperCase() + string.slice(1)
             string = string.replace("_", " ")
             return string
         },
-        openPetProfile(pet) {
+        openPetProfile(pet: any) {
             console.log("View", pet.name)
+        },
+        async openSettings() {
+            await navigateTo('/account-settings')
         }
     }
 }
