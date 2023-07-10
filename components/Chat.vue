@@ -1,18 +1,26 @@
 <template>
     <!-- https://vuetifyjs.com/en/components/sheets/ I normally just follow examples to see how to use these -->
     
-    <VSheet rounded>
+    <VSheet rounded height="100%">
         <!-- Fluid means "fill parent div horizontally as best as possible with snapping to only select dimensions" -->
-        <VContainer fluid>
+        <VContainer fluid style="display: flex; flex-direction: column; height: 100%;">
             <!-- Chat feed -->
-            <VSheet height="50vh" color="grey-lighten-2" rounded style="overflow-y: auto;">
+            <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
                 <VContainer fluid class="chatContainer" ref="chatContainer">
                     <InfoMessage/>
 
-                    <ChatMessage v-for="message in messages"
-                        :message-content="message.text" 
-                        :author-is-local="message.fromLocalAuthor"
-                    /> <!-- The ':' in :message-content means "the following text is code, probably referencing a variable" -->
+                    <template v-for="(message, index) in messages">
+                        <!-- Assume messages are in chronological order -->
+                        <TimeMessage v-if="timeDiffSignificant(message.timestamp, messages[index-1]?.timestamp ?? 0)"
+                            :timestamp="message.timestamp"
+                        />
+
+                        <ChatMessage
+                            :message-content="message.text" 
+                            :author-is-local="message.fromLocalAuthor"
+                        /> <!-- The ':' in :message-content means "the following text is code, probably referencing a variable" -->
+                    </template>
+
                 </VContainer>
             </VSheet>
 
@@ -45,17 +53,21 @@ import InfoMessage from "./chatComponents/InfoMessage.vue";
 import TimeMessage from "./chatComponents/TimeMessage.vue";
 import {TextMessagePayload} from "~/types/chat/messageTypes";
 
+const SIGNIFICANT_TIME_DIFFERENCE = 1000 * 60 * 30 //30 minutes;
+
 export default {
     components: {ChatMessage, InfoMessage, TimeMessage},
     data() {
         return {
             messages: [
-                {text: "Hi", fromLocalAuthor: false, timestamp: new Date(Date.now())},
-                {text: "Hey", fromLocalAuthor: false, timestamp: new Date(Date.now())},
-                // {text: "Yo", fromLocalAuthor: false, timestamp: new Date(Date.now())},
-                // {text: "Sup", fromLocalAuthor: false, timestamp: new Date(Date.now())},
+                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 108)},
+                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 48)},
+                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 24)},
+                {text: "Hey", fromLocalAuthor: false, timestamp: Date.now()},
+                // {text: "Yo", fromLocalAuthor: false, timestamp: Date.now()},
+                // {text: "Sup", fromLocalAuthor: false, timestamp: Date.now()},
             ] as TextMessagePayload[],
-            textBoxData: ""
+            textBoxData: "",
         }
     },
     methods: {
@@ -64,22 +76,30 @@ export default {
             this.postMessage({
                 text: this.textBoxData,
                 fromLocalAuthor: true,
-                timestamp: new Date(Date.now())
+                timestamp: Date.now()
             });
             this.textBoxData = "";
         },
 
         postMessage(messagePayload: TextMessagePayload) {
             this.messages.push(messagePayload);
-            this.$refs.chatContainer?.$el.scroll(0, -10000)
+        },
 
+        /**
+         * 
+         * @param timeA Time such that timeA >= timeB
+         * @param timeB 
+         * @returns True if timeA >= timeB + Significant diff constant
+         */
+        timeDiffSignificant(timeA: number, timeB: number) {
+            return timeA >= timeB + SIGNIFICANT_TIME_DIFFERENCE
         }
     },
     mounted() {
         //Temporary to simulate incoming messages
         setInterval(() => {
-            this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: new Date(Date.now())});
-        }, 5000)
+            this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: Date.now()});
+        }, 60000)
     }
 }
 </script>
@@ -90,7 +110,7 @@ export default {
     min-height: 100% !important;
     flex-direction: column;
     
-    justify-content: end;
-    align-content: end;
+    justify-content: flex-end;
+    align-content: flex-end;
 }
 </style>
