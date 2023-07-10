@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "pet-watch",
   "private": true,
   "scripts": {
     "build": "nuxt build",
@@ -12,5 +12,9 @@
     "@nuxt/devtools": "latest",
     "@types/node": "^18",
     "nuxt": "^3.6.2"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.2.96",
+    "vuetify": "^3.3.7"
   }
 }
