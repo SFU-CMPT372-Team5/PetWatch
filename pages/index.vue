@@ -68,11 +68,7 @@
                             create an account, and input your contact information and any essential details about you furry
                             companions. In return, we provide a unique QR code for each of your pets. The magic happens when
                             a
-                            personalized QR code is printed and delicately attached to your furry friend's collar. By
-                            printing
-                            and attaching a unique QR code to their pet's collar, we ensure a seamless connection between
-                            lost
-                            pets and caring individuals. In the unfortunate event that a pet goes missing, our app acts as a
+                            personalized QR code is printed and delicately attached to your furry friend's collar. In the unfortunate event that a pet goes missing, our app acts as a
                             bridge between concerned citizens, whom we fondly refer to as "finders," and pet owners. By
                             simply
                             scanning the QR code on a lost pet's collar, finders gain instant access to vital contact
