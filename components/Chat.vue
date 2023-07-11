@@ -99,10 +99,10 @@ export default {
         }
     },
     mounted() {
-        //Temporary to simulate incoming messages
-        setInterval(() => {
-            this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: Date.now()});
-        }, 1000)
+        //FIXME Temporary to simulate incoming messages
+        // setInterval(() => {
+        //     this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: Date.now()});
+        // }, 1000)
     }
 }
 </script>
