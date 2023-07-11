@@ -3,6 +3,7 @@
         class="infoMessage"
         color="orange-accent-3"
         variant="elevated"
+        density="compact"
     >
         <VCardText>Warning: This user isn't logged in to a PetWatch account.<br>Be careful sharing private information. Message history will not be saved.</VCardText>
     </VCard>
@@ -17,7 +18,7 @@
     text-align: center;
     margin-bottom: auto;
     position: sticky;
-    top: 3px;
+    top: 0px;
     z-index: 1;
 }
 </style>

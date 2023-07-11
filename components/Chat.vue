@@ -5,6 +5,9 @@
         <!-- Fluid means "fill parent div horizontally as best as possible with snapping to only select dimensions" -->
         <VContainer fluid style="display: flex; flex-direction: column; height: 100%;">
             <!-- Chat feed -->
+            <VCard color="teal" variant="flat">
+                <VCardTitle>Chat with: Laura</VCardTitle>
+            </VCard>
             <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
                 <VContainer fluid class="chatContainer" ref="chatContainer">
                     <InfoMessage/>
@@ -99,7 +102,7 @@ export default {
         //Temporary to simulate incoming messages
         setInterval(() => {
             this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: Date.now()});
-        }, 60000)
+        }, 1000)
     }
 }
 </script>

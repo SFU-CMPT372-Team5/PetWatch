@@ -12,7 +12,17 @@
 </template>
 
 <script lang="ts">
-import { once } from 'events';
+function inView(el: Element) {
+    var rect = el.getBoundingClientRect();
+    var elemTop = rect.top;
+    var elemBottom = rect.bottom;
+
+    // Only completely visible elements return true:
+    var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
+    // Partially visible elements return true:
+    //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
+    return isVisible;
+}
 
 export default {
     props: {
@@ -36,7 +46,7 @@ export default {
                 //Otherwise do nothing (if not at bottom and remote sent message)
 
             this.$nextTick(() => { //Otherwise the element will still be a v-if placeholder in the DOM
-                if (newVal && !oldVal && this.$el && this.$el.scrollIntoView) {
+                if (inView(this.$el) || (this.authorIsLocal && newVal && !oldVal && this.$el.scrollIntoView != undefined)) {
                     this.$el.scrollIntoView({behavior: 'smooth'})
                 }
             })
