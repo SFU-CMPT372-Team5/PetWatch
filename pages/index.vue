@@ -132,10 +132,8 @@
                         </v-card-title>
 
                         <v-card-text>
-                            <p>Our chat feature enables finders to ask questions, provide details about the found pet, or
-                                coordinate a meeting for the safe return of the pet. This direct communication channel
-                                between pet finders and owners can significantly streamline the process of reuniting lost
-                                pets with their rightful guardians.</p>
+                            <p>With open lines of communication and a shared goal of bringing joy and relief, finders and owners can work hand in hand using our chat feature. This direct communication channel between pet finders and owners can significantly streamline the process of reuniting lost
+                            pets with their rightful guardians.</p>
                         </v-card-text>
                     </v-card>
                 </v-col>
