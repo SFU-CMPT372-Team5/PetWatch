@@ -1,4 +1,5 @@
 <template>
+  
   <v-container>
     <h2 class="text-center">Pet Information</h2>
     <v-card>
@@ -10,11 +11,14 @@
         <p><b>Breed:</b> {{ formData.breed }}</p>
         <p><b>lostStatus:</b> {{ formData.lostStatus }}</p>
       </v-card-text>
+      <qrcode-vue :value="value" :size="size" level="H" /> 
     </v-card>
+    
   </v-container>
 </template>
 
 <script>
+import QrcodeVue from 'qrcode.vue'
 export default {
   data() {
     return {
@@ -23,7 +27,10 @@ export default {
   },
   mounted() {
     this.formData = this.$route.query;
-  }
+  },
+  components: {
+      QrcodeVue,
+  },
 };
 </script>
 
