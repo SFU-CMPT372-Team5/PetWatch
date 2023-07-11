@@ -3,6 +3,10 @@ import config from "./config.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+
+  runtimeConfig: {
+    mongoUrl: process.env.MONGO_URL
+  },
   
   // Add in the modules we are using
   modules: [
@@ -19,6 +23,10 @@ export default defineNuxtConfig({
   // Tell Nuxt to build Vuetify
   build: {
     transpile: ["vuetify"]
+  },
+
+  nitro: {
+    plugins: ["~/server/mongo/index.ts"]
   },
 
   // Whether or not to use server-side-rendering
