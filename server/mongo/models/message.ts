@@ -1,13 +1,17 @@
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    chatID: String,
+    Chat_UID: {
+        type: String, 
+        required: true, 
+        unique: true
+    },
 
-    isOwnerMessage: Boolean, //If the owner of the chat sent the message or not
+    isOwnerMessage: {type: Boolean, required: true}, //If the owner of the chat sent the message or not
 
-    timeSent: Number, //Unix Timestamp, Date::getTime() in node
+    timeSent: {type: Number, required: true}, //Unix Timestamp, Date::getTime() in node
     
-    text: String
+    text: {type: String, required: true}
 })
 
 export default mongoose.model("Message", schema, "messages");
