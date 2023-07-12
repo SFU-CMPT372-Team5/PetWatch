@@ -81,10 +81,7 @@ export default {
         }).then(() => {
           this.$router.push({
             //Navigate to the FormData page and pass Pet_UID as query parameter
-            path: '/pets/',
-            query: {
-              petID: Pet_UID,
-            }
+            path: '/pets/'+Pet_UID
           })
         }
         )
