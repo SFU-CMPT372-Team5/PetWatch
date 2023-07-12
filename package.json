@@ -16,13 +16,11 @@
   },
   "dependencies": {
     "@mdi/font": "^7.2.96",
-    "firebase": "^10.0.0",
-    "nuxt-vuefire": "^0.2.1",
-    "vuefire": "^3.1.2",
-    "qrcode.vue": "^3.4.0",
+    "@sidebase/nuxt-auth": "^0.6.0-beta.3",
     "luxon": "^3.3.0",
     "mongoose": "^7.3.2",
     "nuxt-socket-io": "^3.0.12",
+    "qrcode.vue": "^3.4.0",
     "vuetify": "^3.3.7"
   }
 }

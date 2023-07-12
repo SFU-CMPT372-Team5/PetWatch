@@ -34,12 +34,22 @@
                                 comprehensive pet recovery system.</p>
                         </v-card-text>
                         <v-card-actions>
-                            <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined>
-                                Login
-                            </v-btn>
-                            <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined>
-                                Sign Up
-                            </v-btn>
+                            <template v-if="!loggedIn">
+                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="signIn">
+                                    Login
+                                </v-btn>
+                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="signIn">
+                                    Sign Up
+                                </v-btn>
+                            </template>
+                            <template v-else>
+                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="toAccount">
+                                    My Account
+                                </v-btn>
+                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="signOut">
+                                    Sign Out
+                                </v-btn>
+                            </template>
                         </v-card-actions>
                     </v-card>
                 </v-col>
@@ -164,8 +174,17 @@
     </v-main>
 </template>
 
+
 <script lang="ts">
+const {signIn, signOut, getSession, status} = useAuth();
+
 export default {
+    computed: {
+        loggedIn() {
+            console.log(status.value)
+            return status.value == "authenticated"
+        }
+    },
     data: () => ({
         drawer: false,
         formInputWidth: '700px',
@@ -211,6 +230,19 @@ export default {
             },
         ],
     }),
+    methods: {
+        toAccount() {
+            this.$router.push({
+                path: "/account"
+            })
+        },
+        signIn() {
+            return signIn("auth0")
+        },
+        signOut() {
+            return signOut();
+        }
+    }
 };
 </script>
 
