@@ -3,6 +3,8 @@ export default interface ChatModel {
     
     petID: string,
     
+    // isTemporary: boolean
+
     ownerID: string,
     strangerID: string, //Or undefined if not logged in
 }
