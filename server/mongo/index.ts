@@ -8,6 +8,6 @@ export default async () => {
         await mongoose.connect(config.mongoUrl);
         console.log("DB connection established.");
     } catch (err) {
-        console.error.bind("DB connection failed.", err);
+        console.error("DB connection failed.", err);
     }
 };
