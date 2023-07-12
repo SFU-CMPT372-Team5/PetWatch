@@ -99,7 +99,7 @@ export default {
         },
         async openSettings() {
             await navigateTo('/account-settings')
-        }
+        },
     }
 }
 </script>
