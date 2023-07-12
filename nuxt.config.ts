@@ -13,7 +13,14 @@ export default defineNuxtConfig({
     
     //None for now, but later on this might have things like 
     //axios for web requests, a websocket library and other things like auth or whatnot
+    '@sidebase/nuxt-auth',
   ],
+
+  auth: {
+    isEnabled: true,
+    defaultProvider: "auth0",
+    origin: process.env.AUTH_ORIGIN
+  },
 
   // Tell Nuxt to load Vuetify css
   css: [
@@ -26,7 +33,7 @@ export default defineNuxtConfig({
   build: {
     transpile: ["vuetify"]
   },
-
+  
   nitro: {
     plugins: ["~/server/mongo/index.ts"]
   },

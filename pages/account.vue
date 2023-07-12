@@ -12,7 +12,6 @@
                         <v-card-title class="bg-grey-lighten-2">
 
                             <span class="text-h5">Your Account</span>
-
                             <v-spacer></v-spacer>
 
 
@@ -60,9 +59,14 @@
             </v-row>
 
         </VContainer>
-
     </VSheet>
 </template>
+
+<script lang="ts" setup>
+definePageMeta({
+    middleware: "auth"
+})
+</script>
 
 <script lang="ts">
 export default {
@@ -79,6 +83,7 @@ export default {
                 }
 
             },
+            userID: "",
             pets: [
                 {
                     name: "Dog1"
