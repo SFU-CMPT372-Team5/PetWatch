@@ -6,11 +6,12 @@ const schema = new mongoose.Schema({
         unique: true,
         required: true
     }, //Primary Key
-    accountDetails: {
+    dateCreated: Number,
+    userDetails: {
         name: String,
         address: String,
+        email: String,
         phone: String,
-        created: Number,
         additionalInfo: [
             {
                 detailName: String,

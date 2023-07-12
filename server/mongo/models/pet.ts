@@ -5,8 +5,8 @@ const schema = new mongoose.Schema({
         type: String,
         unique: true
     }, //Primary Key: This will also double as our url endpoint, so the qr codes point to ex) https://PetWatch.com/found/<Pet_UID>
+    petOwnerID: String,
     petDetails: {
-        petOwner: String,
         name: String,
         species: String,
         breed: String, //Optional

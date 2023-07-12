@@ -1,7 +1,7 @@
-export default interface PetModel {
+export default interface PetModel extends LimitedPetModel {
     Pet_UID: string, //Primary Key: This will also double as our url endpoint, so the qr codes point to ex) https://PetWatch.com/found/<Pet_UID>
+    petOwnerID: string,
     petDetails: {
-        petOwner: string,
         name: string,
         species: string,
         breed?: string, //Optional
@@ -35,4 +35,13 @@ export default interface PetModel {
     },
 
     chats: string[]
+}
+
+export interface LimitedPetModel {
+    Pet_UID: string,
+    petOwnerID: string,
+    petDetails: {
+        name: string,
+    },
+    isMissing: boolean
 }
