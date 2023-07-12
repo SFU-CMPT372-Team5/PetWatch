@@ -5,7 +5,7 @@
     <VCard class="mb-1" width="100%">
       <VRow style="width: 100%">
         <VCol :cols="cols[1]" style="display: flex;">
-          <VImg src="/images/tmp-demo-dog-img.jpg" lazy-src="/images/tmp-demo-dog-img.jpg" cover >
+          <VImg src="/images/paw.jpg" lazy-src="/images/paw.jpg" cover >
             <template #placeholder>
               <div class="d-flex align-center justify-center fill-height">
                 <v-progress-circular

@@ -1,97 +1,88 @@
 <template>
-    <VSheet rounded>
-
+    <VSheet rounded color="blue-accent-1" class="fill-height">
         <VContainer fluid>
-
-            <v-row>
-
-                <v-col cols="12" sm="10" offset-sm="1">
-
+            <v-row justify="center">
+                <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
                     <v-card>
-
                         <v-card-title class="bg-grey-lighten-2">
-
                             <span class="text-h5">Your Account</span>
                             <v-spacer></v-spacer>
-
-
-
-
-                            <v-btn @click="openSettings">Settings</v-btn>
-
-
                         </v-card-title>
-
-
                         <VContainer fluid>
-
-                            <span class="text-h5">{{ account.username }}</span>
-
                             <v-spacer></v-spacer>
-
                             <v-list rounded>
-
-                                <v-list-item v-for="(info, i) in account.info" :key="i">
-
-                                    <v-list-item-title>{{ formatLabel(i) }}:</v-list-item-title>
-
-                                    <v-list-item-subtitle v-text="info"></v-list-item-subtitle>
-                                </v-list-item>
+                                <VListItem title="Name" :subtitle="(apiData as UserModel).userDetails.name"/>
+                                <VListItem title="Email" :subtitle="(apiData as UserModel).userDetails.email"/>
+                                <VListItem title="Address" :subtitle="(apiData as UserModel).userDetails.address"/>
+                                <VListItem title="Phone" :subtitle="(apiData as UserModel).userDetails.phone"/>
                             </v-list>
-                        </VContainer>
 
-
-                        <VContainer fluid>
-
-                            <span class="text-h5">Pets</span>
-
-                            <v-list class="bg-grey-lighten-4" rounded>
-
-                                <v-list-item v-for="(pet, i) in pets" :key="i" :value="pet" base-color="teal"
-                                    @click="openPetProfile(pet)">
-
-                                    <v-list-item-title class="text-h6 text-black" v-text="pet.name"></v-list-item-title>
-                                </v-list-item>
-                            </v-list>
+                            <v-btn @click="openSettings" color="blue-darken-2">Edit Profile</v-btn>
                         </VContainer>
                     </v-card>
+                    <VCard class="mt-3">
+                        <VCardText>
+                            <span class="text-h5">Your Pets</span>
+                        </VCardText>
+                        <VContainer fluid>
+                            <VRow justify="center">
+                                <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
+                                    v-for="pet in (petApiData as PetModel[])" 
+                                    :cols="chatCardCols"
+                                >
+                                    <VCard>
+                                        <VImg src="/images/paw.jpg" cover/>
+                                        <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
+                                    </VCard>
+                                </VCol>
+                                <VCol v-else>
+                                    <VCard class="text-center" color="green-accent-1">
+                                        <VCardTitle>You don't have any pets!</VCardTitle>
+                                        <VCardText>Add a pet to your profile by clicking below</VCardText>
+                                        <VCardActions style="justify-content: center;">
+                                            <VBtn variant="elevated" color="blue-darken-2">Create new Pet</VBtn>
+                                        </VCardActions>
+                                    </VCard>
+                                </VCol>
+                            </VRow>
+                        </VContainer>
+                    </VCard>
                 </v-col>
             </v-row>
-
         </VContainer>
     </VSheet>
 </template>
 
 <script lang="ts" setup>
+import type UserModel from 'types/models/user';
+import type PetModel from "types/models/pet";
+
 definePageMeta({
     middleware: "auth"
 })
+
+const {data: apiData } = await useFetch("/api/account/info")
+const {data: petApiData} = await useFetch("/api/account/pets")
 </script>
 
 <script lang="ts">
 export default {
     data() {
         return {
-            //possible account attributes
-            account: {
-                username: "User1",
-                password: "pass",
-                info: {
-                    email: "user1@petwatch.com",
-                    address: "12345 10st",
-                    dateCreated: "November 10",
-                }
+            expectedApiData: {
+                userDetails: {
+                    name: "",
 
-            },
-            userID: "",
-            pets: [
-                {
-                    name: "Dog1"
-                },
-                {
-                    name: "Dog2"
                 }
-            ]
+            }
+        }
+    },
+    computed: {
+        chatCardCols() {
+            if (this.$vuetify.display.lgAndUp) return 3;
+            if (this.$vuetify.display.md) return 4;
+            if (this.$vuetify.display.sm) return 6;
+            return 12;
         }
     },
 

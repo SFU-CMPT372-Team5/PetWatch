@@ -1,10 +1,11 @@
 export default interface UserModel {
     User_UID: string, //Primary Key
-    accountDetails: {
+    dateCreated: string,
+    userDetails: {
         name: str,
         address: string,
         phone: string,
-        dateCreated: string
+        email: string,
         additionalInfo: [ //Optional
             {
                 detailName: String,

@@ -3,11 +3,15 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     Pet_UID: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     }, //Primary Key: This will also double as our url endpoint, so the qr codes point to ex) https://PetWatch.com/found/<Pet_UID>
+    petOwnerID: {
+        type: String,
+        required: true
+    },
     petDetails: {
-        petOwner: String,
-        name: String,
+        name: {type: String, required: true},
         species: String,
         breed: String, //Optional
         colour: String,
@@ -20,7 +24,7 @@ const schema = new mongoose.Schema({
         ]
     },
     
-    isMissing: Boolean,
+    isMissing: {type: Boolean, required: true, default: false},
     missingDetails: { //Potentially defined if `isMissing` is true
         lastSeen: { //Optional
             location: String, //Address or map pin (coordinates)
