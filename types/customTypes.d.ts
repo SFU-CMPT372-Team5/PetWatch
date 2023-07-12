@@ -1,0 +1,1 @@
+// If you use object data structures, you should document them here so we know how to interface with each other's code
