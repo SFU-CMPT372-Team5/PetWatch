@@ -1,6 +1,4 @@
 <template>
-
-
     <v-container class="form-container">
       <h2 class="text-center">Add Pet Form</h2>
       <br>
