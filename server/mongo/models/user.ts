@@ -3,12 +3,14 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     User_UID: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     }, //Primary Key
     accountDetails: {
         name: String,
         address: String,
         phone: String,
+        created: Number,
         additionalInfo: [
             {
                 detailName: String,

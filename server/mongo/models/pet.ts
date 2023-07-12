@@ -8,10 +8,10 @@ const schema = new mongoose.Schema({
     petDetails: {
         petOwner: String,
         name: String,
-        animalType: String,
+        species: String,
+        breed: String, //Optional
         colour: String,
-        gender: String, //Optional
-        animalBreed: String, //Optional
+        // gender: String, //Optional
         additionalInfo: [ //Optional
             {
                 detailName: String,
