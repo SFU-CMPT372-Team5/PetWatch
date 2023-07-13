@@ -89,10 +89,10 @@
               class="mb-10"
             >
               <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
-              <VCardActions style="justify-content: center;"><VBtn color="error" variant="elevated">Mark Pet as Lost</VBtn></VCardActions>
+              <VCardActions style="justify-content: center;"><VBtn @click="marklostFunc()" color="error" variant="elevated">Mark Pet as Lost</VBtn></VCardActions>
             </VCard>
           </VCol>
-          <VCol>
+          <VCol v-else>
             <h2 class="text-center">Chats</h2>
             <VContainer>
               <VRow justify="center">
@@ -132,7 +132,7 @@ export default {
           phone: "(123) 456-7890", 
         },
 
-        isMissing: true,
+        isMissing: false,
 
         chats: [
           "Chat1",
@@ -203,6 +203,17 @@ export default {
         })
       }
       this.editing = false;
+    },
+    async marklostFunc(){
+      const lostRes = await $fetch("/api/pet/marklost", {
+        method:"POST",
+        body: {
+          pid:this.$route.params.petID
+        }
+      })
+      if ((lostRes as any).status == 200){
+        this.apiData.isMissing=true;
+      }
     },
     submitEdit() {
       //TODO
