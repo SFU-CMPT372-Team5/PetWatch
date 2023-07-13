@@ -32,18 +32,6 @@ const schema = new mongoose.Schema({
         }
     },
 
-    contactDetails: { //In the future this will have to be changed to add privacy settings
-        name: String,
-        address: String,
-        phone: String,
-        additionalInfo: [ //Optional
-            {
-                detailName: String,
-                detailValue: String
-            }
-        ]
-    },
-
     chats: [String]
 })
 
