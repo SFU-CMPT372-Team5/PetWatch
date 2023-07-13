@@ -31,7 +31,8 @@
                                 <v-form @submit.prevent="submitForm" ref="form" rounded>
                                     <v-text-field v-model="userDetails.name" :rules="nameRules" label="Name" required></v-text-field>
                                     <v-text-field v-model="userDetails.address" label="Address"></v-text-field>
-                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules"></v-text-field>
+                                    <!-- Email updated should update mongodb and auth0 -->
+                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules" disabled></v-text-field>
                                     <v-text-field v-model="userDetails.phone" label="Phone" :rules="phoneRules"></v-text-field>
                                     <v-btn type="submit" block color="blue-darken-2">Submit</v-btn>
                                 </v-form>
