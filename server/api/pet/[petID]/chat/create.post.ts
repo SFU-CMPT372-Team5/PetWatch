@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
         if (petOwner != undefined) {
             const newChat = await chat.create({
-                Chat_UID: `${event.context.params.petID}` + `${token.sub}`,
+                Chat_UID: `${event.context.params.petID}` + `${token.sub.replace("|", "")}`,
                 petID: event.context.params.petID,
                 strangerID: token.sub,
                 ownerID: petOwner.petOwnerID

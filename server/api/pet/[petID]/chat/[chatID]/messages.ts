@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
         if (chatHost == undefined) {
             setResponseStatus(event, 401)
-            return {status: 401};
+            return {status: 401, message: "Failed to authorize with chat host"};
         }
 
         const messages = await message.find({
@@ -30,5 +30,5 @@ export default defineEventHandler(async (event) => {
     }
 
     setResponseStatus(event, 401)
-    return {status: 401};
+    return {status: 401, message: "You are not logged in"};
 })

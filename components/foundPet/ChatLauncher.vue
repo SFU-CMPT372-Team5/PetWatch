@@ -57,9 +57,9 @@ export default {
                 const chatRes = await $fetch<ChatModel>(`/api/pet/${this.$route.params.petID}/chat/create`, {
                     method: "post"
                 })
+                this.chatUID = chatRes.Chat_UID;
 
                 this.dialog = true;
-                this.chatUID = chatRes.Chat_UID;
             } catch(e) {
                 alert("error")
                 this.loadChat = false;
