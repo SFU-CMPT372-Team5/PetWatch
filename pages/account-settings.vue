@@ -87,12 +87,6 @@ export default {
 
     data() {
         return {
-            constUserDetails: {
-                name: "",
-                address: "",
-                email: "",
-                phone: "",
-            },
             userDetails: {
                 name: "",
                 address: "",
@@ -127,7 +121,6 @@ export default {
         async fetchUserData() {
             const apiData = await $fetch("/api/account/info")
             if (apiData) {
-                this.constUserDetails = (apiData as UserModel).userDetails
                 this.userDetails = (apiData as UserModel).userDetails
             }
         },
