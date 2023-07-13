@@ -6,7 +6,7 @@ export async function purgeChatForPet(petID: string) {
             petID: petID
         });
     
-        chatIDs.forEach((id) => {
+        chatIDs.forEach(async (id) => {
             try {
                 const deleteRes = await message.deleteMany({
                     Chat_UID: id
@@ -16,12 +16,14 @@ export async function purgeChatForPet(petID: string) {
             }
             try {
                 const deleteRes = await chat.deleteOne({
-                    Chat_UID: chatID
+                    Chat_UID: id
                 })
             } catch(e) {
                 console.error(e);
             }
         })
         console.log(`Deleted chat history for ${chatIDs.length} chats on pet ${petID}`)
+    } catch(e) {
+        console.error(e);
     }
 }

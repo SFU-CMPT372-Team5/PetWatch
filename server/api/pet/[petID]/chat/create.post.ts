@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
     if (token?.sub != undefined) {
         const existingChat = await chat.findOne({
             petID: event.context.params.petID,
-            strangerID: token.sub
+            strangerID: token.sub,
         });
 
         if (existingChat != null) return existingChat;
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
             Pet_UID: event.context.params.petID
         });
 
-        if (petOwner != undefined) {
+        if (petOwner != undefined && petOwner.isMissing) { //Only create if pet missing
             const newChat = await chat.create({
                 Chat_UID: `${event.context.params.petID}` + `${token.sub.replace("|", "")}`,
                 petID: event.context.params.petID,
