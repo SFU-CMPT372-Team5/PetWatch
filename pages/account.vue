@@ -103,7 +103,8 @@ export default {
             ],
             emailRules: [
                 (value: string) => {
-                    if (/^[a-z.-]+@[a-z.-]+\.[a-z]+$/i.test(value)) return true
+                    //https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
+                    if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) return true
 
                     return 'Must be a valid e-mail.'
                 }
