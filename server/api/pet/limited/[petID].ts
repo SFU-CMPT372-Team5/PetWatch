@@ -17,8 +17,7 @@ export default defineEventHandler(async (event) => {
                 "chats": 0
             })
 
-            if (missingPetRes) {
-                console.error("VERY BAD THING");
+            if (missingPetRes == undefined) {
                 setResponseStatus(event, 500);
                 return {status: 500};
             } else {
