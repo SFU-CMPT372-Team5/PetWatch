@@ -3,7 +3,7 @@
         <VContainer fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
-                    <v-card>
+                    <v-card v-if="!isEditing">
                         <v-card-title class="bg-grey-lighten-2">
                             <span class="text-h5">Your Account</span>
                             <v-spacer></v-spacer>
@@ -17,8 +17,27 @@
                                 <VListItem title="Phone" :subtitle="(apiData as UserModel).userDetails.phone"/>
                             </v-list>
 
-                            <v-btn @click="openSettings" color="blue-darken-2">Edit Profile</v-btn>
+                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
                         </VContainer>
+                    </v-card>
+                    <v-card v-else>
+                        <v-card-title class="bg-grey-lighten-2">
+                            <span class="text-h5">Edit</span>
+                            <v-spacer></v-spacer>
+                        </v-card-title>
+                            <VContainer fluid>
+                                <v-list rounded>
+                                <!-- Edit form -->
+                                <v-form @submit.prevent="submitForm" ref="form" rounded>
+                                    <v-text-field v-model="userDetails.name" :rules="nameRules" label="Name" required></v-text-field>
+                                    <v-text-field v-model="userDetails.address" label="Address"></v-text-field>
+                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules"></v-text-field>
+                                    <v-text-field v-model="userDetails.phone" label="Phone" :rules="phoneRules"></v-text-field>
+                                    <v-btn type="submit" block color="blue-darken-2">Submit</v-btn>
+                                </v-form>
+                                </v-list>
+                                <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
+                            </VContainer>                        
                     </v-card>
                     <VCard class="mt-3">
                         <VCardText>
@@ -68,12 +87,34 @@ const {data: petApiData} = await useFetch("/api/account/pets")
 export default {
     data() {
         return {
-            expectedApiData: {
-                userDetails: {
-                    name: "",
+            isEditing: false,
+            userDetails: {
+                name: "",
+                address: "",
+                email: "",
+                phone: "",
+            },
+            nameRules: [
+                (value: String) => {
+                    if (value) return true
 
+                    return 'You must enter a name.'
+                },
+            ],
+            emailRules: [
+                (value: string) => {
+                    if (/^[a-z.-]+@[a-z.-]+\.[a-z]+$/i.test(value)) return true
+
+                    return 'Must be a valid e-mail.'
                 }
-            }
+            ],
+            phoneRules: [
+                (value: string) => {
+                    if (!value || (value?.length > 9 && /[0-9-]+/.test(value))) return true
+
+                    return 'Phone number needs to be at least 9 digits.'
+                },
+            ]
         }
     },
     computed: {
@@ -93,12 +134,29 @@ export default {
             string = string.replace("_", " ")
             return string
         },
-        openPetProfile(pet: any) {
-            console.log("View", pet.name)
+        async fetchUserData() {
+            const apiData = await $fetch("/api/account/info")
+            if (apiData) {
+                this.userDetails = (apiData as UserModel).userDetails
+            }
         },
-        async openSettings() {
-            await navigateTo('/account-settings')
-        }
+
+        async submitForm() {
+            const { valid } = await (this.$refs?.form as any).validate()
+            if (valid) {
+                await $fetch("/api/account/update", {
+                    method: 'PUT',
+                    body: {
+                        userDetails: this.userDetails
+                    }
+                })
+                this.$router.go(0)
+            }
+        },
+    },
+
+    mounted() {
+        this.fetchUserData()
     }
 }
 </script>
