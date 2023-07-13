@@ -6,6 +6,6 @@ export default defineEventHandler(async (event) => {
         await pet.create(body)
         return { message: 'Pet created' }
     } catch (e) {
-        console.error(e)
+        return (e)
     }
 });

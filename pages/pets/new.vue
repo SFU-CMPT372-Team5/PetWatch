@@ -61,20 +61,27 @@ export default {
   },
   methods: {
     async submitForm() {
-      await $fetch("/api/auth/userID").then(async (response) => {
+      await $fetch("/api/account/info").then(async (response) => {
         const Pet_UID = "PET" + Date.now()
-        await $fetch("/api/pets/create", {
+        console.log(response)
+        await $fetch("/api/pet/create", {
           method: 'POST',
           body: {
             Pet_UID: Pet_UID,
+            petOwnerID: response.User_UID,
             petDetails: {
-              petOwner: response,
               name: this.name,
               animalType: this.petType,
               colour: this.petColor,
               animalBreed: this.breed
             },
-            isMissing: this.lostStatus === 'Lost'
+            isMissing: this.lostStatus === 'Lost',
+            contactDetails: {
+              name: response.userDetails.name,
+              address: response.userDetails.address,
+              phone: response.userDetails.phone,
+
+            }
           }
         }).catch(e => {
           console.error(e)
