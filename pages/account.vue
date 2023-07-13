@@ -80,8 +80,8 @@ definePageMeta({
     middleware: "auth"
 })
 
-const {data: apiData } = await useFetch("/api/account/info")
-const {data: petApiData} = await useFetch("/api/account/pets")
+const {data: apiData } = await useFetch("/api/account/info");
+const {data: petApiData} = await useFetch("/api/account/pets");
 </script>
 
 <script lang="ts">

@@ -21,13 +21,12 @@ export default interface PetModel extends LimitedPetModel {
             location: string, //Address or map pin (coordinates)
             time: number //Unix Timestamp, Date::getTime() in node
         }
-    },
-    chats: string[]
+    }
 }
 
 export interface LimitedPetModel {
     Pet_UID: string,
-    petOwnerID: string,
+    // petOwnerID: string,
     petDetails: {
         name: string,
     },

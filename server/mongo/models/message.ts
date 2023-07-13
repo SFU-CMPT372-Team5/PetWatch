@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     Chat_UID: {
         type: String, 
-        required: true, 
-        unique: true
+        required: true,
     },
 
     isOwnerMessage: {type: Boolean, required: true}, //If the owner of the chat sent the message or not

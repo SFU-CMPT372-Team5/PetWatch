@@ -147,8 +147,8 @@
                   <h2 class="text-center">Chats</h2>
                   <VContainer>
                     <VRow justify="center">
-                      <VCol :cols="chatCardCols" v-for="chatID in petApiData.chats">
-                        <ChatCard :chatID="chatID" />
+                      <VCol :cols="chatCardCols" v-for="chat in activeChats">
+                        <ChatCard :chatData="chat" :petID="(petID as string)"/>
                       </VCol>
                     </VRow>
                   </VContainer>
@@ -173,6 +173,7 @@ const petID = route.params.petID
 
 const { data: petApiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
 const { data: userApiData } = await useFetch<UserModel>(`/api/account/info`);
+const {data: activeChats} = await useFetch<ChatModel[]>(`/api/pet/${petID}/chats`)
 
 let loaded = false;
 let hasData = false;
@@ -189,6 +190,7 @@ import QrcodeVue from 'qrcode.vue';
 import UserModel from 'types/models/user';
 import ChatCard from "~/components/petProfile/ChatCard.vue";
 import type PetModel from "~/types/models/pet";
+import type ChatModel from 'types/models/chat'
 
 export default {
   computed: {
