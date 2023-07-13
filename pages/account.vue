@@ -27,11 +27,9 @@
                         <VContainer fluid>
                             <VRow justify="center">
                                 <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
-                                    v-for="pet in (petApiData as PetModel[])" 
-                                    :cols="chatCardCols"
-                                >
+                                    v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
                                     <VCard>
-                                        <VImg src="/images/paw.jpg" cover/>
+                                        <VImg src="/images/paw.jpg" cover />
                                         <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
                                     </VCard>
                                 </VCol>
@@ -39,11 +37,12 @@
                                     <VCard class="text-center" color="green-accent-1">
                                         <VCardTitle>You don't have any pets!</VCardTitle>
                                         <VCardText>Add a pet to your profile by clicking below</VCardText>
-                                        <VCardActions style="justify-content: center;">
-                                            <VBtn variant="elevated" color="blue-darken-2">Create new Pet</VBtn>
-                                        </VCardActions>
                                     </VCard>
                                 </VCol>
+                                <VCardActions style="justify-content: center;">
+                                    <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                        new Pet</VBtn>
+                                </VCardActions>
                             </VRow>
                         </VContainer>
                     </VCard>
