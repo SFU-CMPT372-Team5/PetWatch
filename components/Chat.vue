@@ -6,11 +6,14 @@
         <VContainer fluid style="display: flex; flex-direction: column; height: 100%;">
             <!-- Chat feed -->
             <VCard color="teal" variant="flat">
-                <VCardTitle>Chat with: Laura</VCardTitle>
+                <VCardTitle>Chat with: {{ ownerName }}</VCardTitle>
             </VCard>
             <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
+                
                 <VContainer fluid class="chatContainer" ref="chatContainer">
-                    <InfoMessage/>
+                    <!-- Cant be bothered with sockets for now -->
+                    <VBtn location="center center" position="absolute" style="max-width: fit-content;" @click="checkForNewMessages" :loading="checkNewMessageLoading">Check for new messages</VBtn>
+                    <!-- <InfoMessage/> -->
 
                     <template v-for="(message, index) in messages">
                         <!-- Assume messages are in chronological order -->
@@ -51,6 +54,7 @@
 </template>
 
 <script lang="ts">
+import MessageModel from "types/models/message";
 import ChatMessage from "./chatComponents/ChatMessage.vue";
 import InfoMessage from "./chatComponents/InfoMessage.vue";
 import TimeMessage from "./chatComponents/TimeMessage.vue";
@@ -63,15 +67,16 @@ export default {
     data() {
         return {
             messages: [
-                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 108)},
-                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 48)},
-                {text: "Hi", fromLocalAuthor: false, timestamp: Date.now() - (1000 * 60 * 60 * 24)},
-                {text: "Hey", fromLocalAuthor: false, timestamp: Date.now()},
-                // {text: "Yo", fromLocalAuthor: false, timestamp: Date.now()},
-                // {text: "Sup", fromLocalAuthor: false, timestamp: Date.now()},
             ] as TextMessagePayload[],
             textBoxData: "",
+
+            checkNewMessageLoading: false
         }
+    },
+    props: {
+        "chatID": String,
+        "ownerName": String,
+        "isStranger": Boolean
     },
     methods: {
         submitTextBox() {
@@ -84,8 +89,21 @@ export default {
             this.textBoxData = "";
         },
 
-        postMessage(messagePayload: TextMessagePayload) {
-            this.messages.push(messagePayload);
+        async postMessage(messagePayload: TextMessagePayload) {
+            try {
+                const sendRes = await $fetch(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/sendMessage`, {
+                    method: "post",
+                    body: {
+                        text: messagePayload.text
+                    }
+                })
+    
+                if (sendRes) {
+                    this.messages.push(messagePayload);
+                }
+            } catch(e) {
+                alert(e);
+            }
         },
 
         /**
@@ -96,13 +114,35 @@ export default {
          */
         timeDiffSignificant(timeA: number, timeB: number) {
             return timeA >= timeB + SIGNIFICANT_TIME_DIFFERENCE
+        },
+
+        async refreshMessages() {
+            try {
+                const messages = await $fetch<MessageModel[]>(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/messages`)
+
+                this.messages.length = 0;
+                messages.forEach(m => {
+                    this.messages.push({
+                        fromLocalAuthor: !m.isOwnerMessage && this.isStranger,
+                        timestamp: m.timeSent,
+                        text: m.text
+                    })
+                })
+            } catch(e) {
+                alert("error!");
+            }
+        },
+        async checkForNewMessages() {
+            this.checkNewMessageLoading = true;
+            this.checkForNewMessages();
+
+            setTimeout(() => {
+                this.checkNewMessageLoading = false;
+            }, 1500)
         }
     },
     mounted() {
-        //FIXME Temporary to simulate incoming messages
-        // setInterval(() => {
-        //     this.postMessage({text: "Ping", fromLocalAuthor: false, timestamp: Date.now()});
-        // }, 1000)
+        this.refreshMessages();
     }
 }
 </script>
