@@ -6,13 +6,13 @@
         <VContainer fluid style="display: flex; flex-direction: column; height: 100%;">
             <!-- Chat feed -->
             <VCard color="teal" variant="flat">
-                <VCardTitle>Chat with: {{ ownerName }}</VCardTitle>
+                <VCardTitle>Chat with: {{ strangerName }}</VCardTitle>
             </VCard>
             <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
                 
                 <VContainer fluid class="chatContainer" ref="chatContainer">
                     <!-- Cant be bothered with sockets for now -->
-                    <VBtn location="center center" position="absolute" style="max-width: fit-content;" @click="checkForNewMessages" :loading="checkNewMessageLoading">Check for new messages</VBtn>
+                    <VBtn location="top center" position="absolute" style="max-width: fit-content;" @click="checkForNewMessages" :loading="checkNewMessageLoading||refreshing">Check for new messages</VBtn>
                     <!-- <InfoMessage/> -->
 
                     <template v-for="(message, index) in messages">
@@ -70,12 +70,14 @@ export default {
             ] as TextMessagePayload[],
             textBoxData: "",
 
-            checkNewMessageLoading: false
+            checkNewMessageLoading: false,
+            refreshing: false
         }
     },
     props: {
         "chatID": String,
-        "ownerName": String,
+        "petID": String,
+        "strangerName": String,
         "isStranger": Boolean
     },
     methods: {
@@ -91,7 +93,7 @@ export default {
 
         async postMessage(messagePayload: TextMessagePayload) {
             try {
-                const sendRes = await $fetch(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/sendMessage`, {
+                const sendRes = await $fetch(`/api/pet/${this.petID}/chat/${this.chatID}/sendMessage`, {
                     method: "post",
                     body: {
                         text: messagePayload.text
@@ -117,13 +119,14 @@ export default {
         },
 
         async refreshMessages() {
+            this.refreshing = true;
             try {
                 const messages = await $fetch<MessageModel[]>(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/messages`)
 
                 this.messages.length = 0;
                 messages.forEach(m => {
                     this.messages.push({
-                        fromLocalAuthor: !m.isOwnerMessage && this.isStranger,
+                        fromLocalAuthor: m.isOwnerMessage != this.isStranger,
                         timestamp: m.timeSent,
                         text: m.text
                     })
@@ -131,10 +134,12 @@ export default {
             } catch(e) {
                 alert("error!");
             }
+            this.refreshing = false;
         },
-        async checkForNewMessages() {
+        checkForNewMessages() {
+            if (this.refreshing) return;
             this.checkNewMessageLoading = true;
-            this.checkForNewMessages();
+            this.refreshMessages();
 
             setTimeout(() => {
                 this.checkNewMessageLoading = false;
@@ -143,6 +148,11 @@ export default {
     },
     mounted() {
         this.refreshMessages();
+
+        //Polling while websockets are not ready
+        setInterval(() => {
+            if (!this.refreshing) this.refreshMessages();
+        }, 5000)
     }
 }
 </script>

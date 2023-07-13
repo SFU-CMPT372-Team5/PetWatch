@@ -1,21 +1,33 @@
 <template>
     <VCard>
         <VCardTitle>
-            Chat with: {{ chatID }}
+            <!-- Proper things coming soon -->
+            Chat with: Finder
         </VCardTitle>
-        <VCardText>Laura: This is a message</VCardText>
+        <!-- <VCardText>Laura: This is a message</VCardText> -->
         <VCardActions style="justify-content: center;">
-            <VBtn color="pink-accent-1" variant="elevated">Open Chat</VBtn>
+            <ChatLauncher :chatID="chatData.Chat_UID" :petID="petID"/>
         </VCardActions>
     </VCard>
 </template>
 
 <script lang="ts">
+import ChatModel from 'types/models/chat';
+import type { PropType } from 'vue';
+import ChatLauncher from './ChatLauncher.vue'
+
 export default {
+    components: {ChatLauncher},
     props: {
-        chatID: {
-            type: String,
+        chatData: {
+            type: Object as PropType<ChatModel>,
             required: true
+        },
+        petID: String
+    },
+    methods: {
+        openChat() {
+
         }
     }
 }

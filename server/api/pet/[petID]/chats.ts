@@ -1,5 +1,5 @@
 import { getToken } from '#auth'
-import { chat } from '../../../../mongo/models';
+import { chat } from '../../../mongo/models';
 
 export default defineEventHandler(async (event) => {
     const token = await getToken({event}); //The { } are important!

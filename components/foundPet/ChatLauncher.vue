@@ -22,7 +22,7 @@
                     <VCardActions>
                         <VBtn color="red-darken-2" variant="elevated" @click="() => dialog=false">Close Chat</VBtn>
                     </VCardActions>
-                    <Chat :chatID="chatUID" :ownerName="ownerName" :isStranger="true"/>
+                    <Chat :chatID="chatUID" :petID="($route.params!.petID as string)" :strangerName="ownerName" :isStranger="true"/>
                 </VCard>
             </v-dialog>
         </div>

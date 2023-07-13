@@ -1,5 +1,5 @@
 import { getToken } from '#auth'
-import { message, chat } from '../../../../../mongo/models';
+import { chat } from '../../../../../mongo/models';
 
 export default defineEventHandler(async (event) => {
     const token = await getToken({event}); //The { } are important!
@@ -18,15 +18,11 @@ export default defineEventHandler(async (event) => {
         })
 
         if (chatHost == undefined) {
-            setResponseStatus(event, 401)
-            return {status: 401};
+            setResponseStatus(event, 404)
+            return {status: 404};
         }
 
-        const messages = await message.find({
-            "Chat_UID": event.context.params.chatID
-        }, {"_id": 0}).sort({timeSent: 1})
-
-        return messages
+        return chatHost;
     }
 
     setResponseStatus(event, 401)
