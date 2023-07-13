@@ -47,6 +47,7 @@
                             </VRow>
                         </VContainer>
                     </VCard>
+                    <VBtn @click="showForm" variant="elevated" color="blue-darken-2">Add Pet</VBtn>
                 </v-col>
             </v-row>
         </VContainer>
@@ -99,6 +100,9 @@ export default {
         },
         async openSettings() {
             await navigateTo('/account-settings')
+        },
+        showForm(){
+            navigateTo('/pets/new')
         }
     }
 }
