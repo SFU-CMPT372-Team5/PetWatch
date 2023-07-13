@@ -3,7 +3,7 @@
 <template>
   <v-container :class="loaded && !hasData ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
     style="flex-direction: column; transition: background-color 0.3s linear;">
-    <VFadeTransition group>
+    <VFadeTransition group leave-absolute>
       <template v-if="!loaded">
         <VRow justify="center" align="center" class="fill-height">
           <VCol>
@@ -281,37 +281,44 @@ export default {
     },
 
 
-    async setLost(lostStatus: boolean) {
+    async setLost(newLostStatus: boolean) {
+      if (newLostStatus && this.isMissing) return;
+
       const lostRes = await $fetch(`/api/pet/${this.$route.params.petID}/setLost`, {
         method: "POST",
         body: {
-          status: lostStatus
+          status: newLostStatus
         }
       })
       if ((lostRes as any).status == 200) {
         console.log("updated")
-        this.isMissing = lostStatus
+        this.isMissing = newLostStatus
+
+        // FIXME temporary, because chat enrollment isn't updated here (yet)
+        if (newLostStatus == true) location.reload();
       }
     },
 
     async fetchPetData() {
-      const apiData = await $fetch<PetModel>(`/api/pet/${this.$route.params.petID}`);
-      if (apiData) {
-        this.petName = apiData.petDetails.name;
-        this.petSpecies = apiData.petDetails.species;
-        const breed = apiData.petDetails.breed;
-        if (breed != undefined) {
-          this.petBreed = breed;
+      try {
+        const apiData = await $fetch<PetModel>(`/api/pet/${this.$route.params.petID}`);
+        if (apiData) {
+          this.petName = apiData.petDetails.name;
+          this.petSpecies = apiData.petDetails.species;
+          const breed = apiData.petDetails.breed;
+          if (breed != undefined) {
+            this.petBreed = breed;
+          }
+          else {
+            this.petBreed = "N/A";
+          }
+          this.petColour = apiData.petDetails.colour;
+  
+          this.isMissing = apiData.isMissing;
+  
+          return true;
         }
-        else {
-          this.petBreed = "N/A";
-        }
-        this.petColour = apiData.petDetails.colour;
-
-        this.isMissing = apiData.isMissing;
-
-        return true;
-      }
+      } catch(e) {}
 
       return false;
     },

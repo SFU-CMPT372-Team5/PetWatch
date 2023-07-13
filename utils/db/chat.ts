@@ -6,17 +6,17 @@ export async function purgeChatForPet(petID: string) {
             petID: petID
         });
     
-        chatIDs.forEach(async (id) => {
+        chatIDs.forEach(async (chatHost) => {
             try {
-                const deleteRes = await message.deleteMany({
-                    Chat_UID: id
+                await message.deleteMany({
+                    Chat_UID: chatHost.Chat_UID
                 })
             } catch(e) {
                 console.error(e);
             }
             try {
-                const deleteRes = await chat.deleteOne({
-                    Chat_UID: id
+                await chat.deleteOne({
+                    Chat_UID: chatHost.Chat_UID
                 })
             } catch(e) {
                 console.error(e);
