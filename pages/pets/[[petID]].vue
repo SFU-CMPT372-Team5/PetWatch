@@ -45,14 +45,47 @@
                           <VCard height="100%">
                             <VCardTitle><h3 class=text-center>Pet Details</h3></VCardTitle>
                             <VCardText>
-                              <VTextField v-if="editing" v-for="(val, key) in apiData!.petDetails"
+                              <VTextField v-if="editing"
                                 density="compact" 
-                                :label="key" 
+                                :label= "'Name'" 
                                 variant="solo"
-                                v-model="apiData!.petDetails[key]"
+                                v-model="apiData!.petDetails.name"
                               />
-                              <p v-else v-for="(val, key) in apiData!.petDetails">
-                                  <b>{{key}}:</b> {{ val ?? "" }}
+                              <p v-else>
+                                  <b>Pet Name:</b> {{ apiData!.petDetails.name }}
+                              </p>
+                            </VCardText>
+                            <VCardText>
+                              <VTextField v-if="editing"
+                                density="compact" 
+                                :label= "'Species'" 
+                                variant="solo"
+                                v-model="apiData!.petDetails.species"
+                              />
+                              <p v-else>
+                                  <b>Species:</b> {{ apiData!.petDetails.species }}
+                              </p>
+                            </VCardText>
+                            <VCardText>
+                              <VTextField v-if="editing"
+                                density="compact" 
+                                :label= "'Breed'" 
+                                variant="solo"
+                                v-model="apiData!.petDetails.breed"
+                              />
+                              <p v-else>
+                                  <b>Breed:</b> {{ apiData!.petDetails.breed ?  apiData!.petDetails.breed : "N/A"}}
+                              </p>
+                            </VCardText>
+                            <VCardText>
+                              <VTextField v-if="editing"
+                                density="compact" 
+                                :label= "'Colour'" 
+                                variant="solo"
+                                v-model="apiData!.petDetails.colour"
+                              />
+                              <p v-else>
+                                  <b>Colour:</b> {{ apiData!.petDetails.colour }}
                               </p>
                             </VCardText>
                           </VCard>
@@ -61,16 +94,21 @@
                           <VCard height="100%">
                             <VCardTitle><h3 class=text-center>Contact Details</h3></VCardTitle>
                             <VCardText>
-                              <VTextField v-if="editing" v-for="(val, key) in apiData!.contactDetails"
-                                density="compact" 
-                                :label="key" 
-                                variant="solo"
-                                v-model="apiData!.contactDetails[key]"
-                              />
-                              <p v-else v-for="(val, key) in apiData!.contactDetails">
-                                  <b>{{key}}:</b> {{ val ?? "" }}
+                              <p>
+                                  <b>Owner Name:</b> {{ apiData!.contactDetails.name}}
                               </p>
                             </VCardText>
+                            <VCardText>
+                              <p>
+                                  <b>Address:</b> {{ apiData!.contactDetails.address}}
+                              </p>
+                            </VCardText>
+                            <VCardText>
+                              <p>
+                                  <b>Phone Number:</b> {{ apiData!.contactDetails.phone}}
+                              </p>
+                            </VCardText>
+                            
                           </VCard>
                         </VCol>
                       </VRow>

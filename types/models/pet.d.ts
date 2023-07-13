@@ -24,6 +24,7 @@ export default interface PetModel extends LimitedPetModel {
     },
 
     contactDetails: { //In the future this will have to be changed to add privacy settings
+        name: string,
         address: string,
         phone: string,
         additionalInfo?: [ //Optional
