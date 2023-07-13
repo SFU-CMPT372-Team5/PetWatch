@@ -1,12 +1,13 @@
 <!-- Pet profile -->
 
 <template>
-  <v-container :class="loaded && !hasData ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
+  <v-container :class="loaded && !hasData ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
+    style="flex-direction: column; transition: background-color 0.3s linear;">
     <VFadeTransition group>
       <template v-if="!loaded">
         <VRow justify="center" align="center" class="fill-height">
           <VCol>
-            <VProgressCircular indeterminate color="grey-lighten-4" size="large"/>
+            <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
           </VCol>
         </VRow>
       </template>
@@ -25,17 +26,14 @@
           <VCard class="mb-1" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <VImg src="/images/paw.jpg" lazy-src="/images/paw.jpg" cover >
+                <VImg src="/images/paw.jpg" lazy-src="/images/paw.jpg" cover>
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height">
-                      <v-progress-circular
-                        color="grey-lighten-4"
-                        indeterminate
-                      ></v-progress-circular>
+                      <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
                     </div>
                   </template>
                 </VImg>
-              </VCol >
+              </VCol>
               <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
                 <v-card>
                   <v-card-text>
@@ -43,95 +41,86 @@
                       <VRow>
                         <VCol :cols="$vuetify.display.mdAndDown ? 12 : 6">
                           <VCard height="100%">
-                            <VCardTitle><h3 class=text-center>Pet Details</h3></VCardTitle>
+                            <VCardTitle>
+                              <h3 class=text-center>Pet Details</h3>
+                            </VCardTitle>
                             <VCardText>
-                              <VTextField v-if="editing"
-                                density="compact" 
-                                :label= "'Name'" 
-                                variant="solo"
-                                v-model="apiData!.petDetails.name"
-                              />
+                              <VTextField v-if="editing" density="compact" :label="'Name'" variant="solo"
+                                v-model="petName" />
                               <p v-else>
-                                  <b>Pet Name:</b> {{ apiData!.petDetails.name }}
+                                <b>Pet Name:</b> {{ petName }}
                               </p>
                             </VCardText>
                             <VCardText>
-                              <VTextField v-if="editing"
-                                density="compact" 
-                                :label= "'Species'" 
-                                variant="solo"
-                                v-model="apiData!.petDetails.species"
-                              />
+                              <VTextField v-if="editing" density="compact" :label="'Species'" variant="solo"
+                                v-model="petSpecies" />
                               <p v-else>
-                                  <b>Species:</b> {{ apiData!.petDetails.species }}
+                                <b>Species:</b> {{ petSpecies }}
                               </p>
                             </VCardText>
                             <VCardText>
-                              <VTextField v-if="editing"
-                                density="compact" 
-                                :label= "'Breed'" 
-                                variant="solo"
-                                v-model="apiData!.petDetails.breed"
-                              />
+                              <VTextField v-if="editing" density="compact" :label="'Breed'" variant="solo"
+                                v-model="petBreed" />
                               <p v-else>
-                                  <b>Breed:</b> {{ apiData!.petDetails.breed ?  apiData!.petDetails.breed : "N/A"}}
+                                <b>Breed:</b> {{ petBreed }}
                               </p>
                             </VCardText>
                             <VCardText>
-                              <VTextField v-if="editing"
-                                density="compact" 
-                                :label= "'Colour'" 
-                                variant="solo"
-                                v-model="apiData!.petDetails.colour"
-                              />
+                              <VTextField v-if="editing" density="compact" :label="'Colour'" variant="solo"
+                                v-model="petColour" />
                               <p v-else>
-                                  <b>Colour:</b> {{ apiData!.petDetails.colour }}
+                                <b>Colour:</b> {{ petColour }}
                               </p>
                             </VCardText>
                           </VCard>
                         </VCol>
                         <VCol>
                           <VCard height="100%">
-                            <VCardTitle><h3 class=text-center>Contact Details</h3></VCardTitle>
+                            <VCardTitle>
+                              <h3 class=text-center>Contact Details</h3>
+                            </VCardTitle>
                             <VCardText>
                               <p>
-                                  <b>Owner Name:</b> {{ apiData!.contactDetails.name}}
+                                <b>Owner Name:</b> {{ apiData!.contactDetails.name }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <p>
-                                  <b>Address:</b> {{ apiData!.contactDetails.address}}
+                                <b>Address:</b> {{ apiData!.contactDetails.address }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <p>
-                                  <b>Phone Number:</b> {{ apiData!.contactDetails.phone}}
+                                <b>Phone Number:</b> {{ apiData!.contactDetails.phone }}
                               </p>
                             </VCardText>
-                            
+
                           </VCard>
                         </VCol>
                       </VRow>
                     </VContainer>
                   </v-card-text>
                   <VCardActions style="justify-content: center;">
-                    <VBtn color="blue-darken-2" variant="elevated" @click="startEdit" v-if="!editing">Edit Information</VBtn>
+                    <VBtn color="blue-darken-2" variant="elevated" @click="startEdit()" v-if="!editing">Edit Information
+                    </VBtn>
                     <template v-else>
-                      <VBtn color="grey-darken-1" variant="text" @click="cancelEdit">Cancel</VBtn>
-                      <VBtn color="success" variant="text" @click="submitEdit">Save Changes</VBtn>
+                      <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()">Cancel</VBtn>
+                      <VBtn color="success" variant="text" @click="submitEdit()">Save Changes</VBtn>
                     </template>
                   </VCardActions>
                 </v-card>
                 <VCard>
-                  <VCardTitle><h2 class="text-center">QR Code</h2></VCardTitle>
+                  <VCardTitle>
+                    <h2 class="text-center">QR Code</h2>
+                  </VCardTitle>
                   <VCardText>
                     <p class=text-center>
                       Attach this QR Code to your pet so that if your pet is lost others can help you find them
-                      <br/><br/>
-                      <qrcode-vue :value="qrValue" level="H" ref="qrCode" /> 
-                      <br/>
+                      <br /><br />
+                      <qrcode-vue :value="qrValue" level="H" ref="qrCode" />
+                      <br />
                       {{ qrValue }}
-                      <br/>
+                      <br />
                       <VBtn @click="downloadQr" color="blue-darken-2">Download as Image</VBtn>
                     </p>
                   </VCardText>
@@ -140,16 +129,17 @@
             </VRow>
           </VCard>
           <VCard width="100%">
-            <VCardTitle><h2 class="text-center">Find your Pet</h2></VCardTitle>
+            <VCardTitle>
+              <h2 class="text-center">Find your Pet</h2>
+            </VCardTitle>
             <VCardText>
               <VRow style="width: 100%">
                 <VCol v-if="!apiData?.isMissing">
-                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" 
-                    location="center"
-                    class="mb-10"
-                  >
+                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
-                    <VCardActions style="justify-content: center;"><VBtn @click="marklostFunc()" color="error" variant="elevated">Mark Pet as Lost</VBtn></VCardActions>
+                    <VCardActions style="justify-content: center;">
+                      <VBtn @click="marklostFunc()" color="error" variant="elevated">Mark Pet as Lost</VBtn>
+                    </VCardActions>
                   </VCard>
                 </VCol>
                 <VCol v-else>
@@ -157,7 +147,7 @@
                   <VContainer>
                     <VRow justify="center">
                       <VCol :cols="chatCardCols" v-for="chatID in apiData.chats">
-                        <ChatCard :chatID="chatID"/>
+                        <ChatCard :chatID="chatID" />
                       </VCol>
                     </VRow>
                   </VContainer>
@@ -180,7 +170,7 @@ const route = useRoute();
 
 const petID = route.params.petID
 
-const {data: apiData, error} = await useFetch<PetModel>(`/api/pet/${petID}`);
+const { data: apiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
 let loaded = false;
 let hasData = false;
 
@@ -188,6 +178,11 @@ if (error.value == undefined) { //The pet is owned by this account and exists
   hasData = true;
 }
 loaded = true;
+
+var petName = apiData.value!.petDetails.name;
+var petSpecies = apiData.value!.petDetails.species;
+var petBreed = apiData.value!.petDetails.breed ? apiData.value!.petDetails.breed : 'N/A';
+var petColour = apiData.value!.petDetails.colour;
 
 </script>
 
@@ -213,7 +208,7 @@ export default {
   },
   data() {
     return {
-      editing: false
+      editing: false,
     }
   },
   components: { QrcodeVue, ChatCard },
@@ -224,43 +219,62 @@ export default {
       let xhr = new XMLHttpRequest();
       xhr.responseType = 'blob';
       xhr.onload = function () {
-          let a = document.createElement('a');
-          a.href = window.URL.createObjectURL(xhr.response);
-          a.download = `PetWatchQRCode.png`;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+        let a = document.createElement('a');
+        a.href = window.URL.createObjectURL(xhr.response);
+        a.download = `PetWatchQRCode.png`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
       };
       xhr.open('GET', canvasImage);
       xhr.send();
     },
     startEdit() {
-      // TODO
+      this.editing = true;
     },
     cancelEdit() {
-      // TODO
+      this.editing = false;
     },
-    submitEdit() {
-      //TODO
-      alert("Submit")
-    },
-
-    async marklostFunc(){
-      const lostRes = await $fetch("/api/pet/marklost", {
-        method:"POST",
+    async submitEdit() {
+      alert("Submitted");
+      await $fetch("/api/pet/edit", {
+        method: "PUT",
         body: {
-          pid:this.$route.params.petID
+          pId: this.$route.params.petID,
+          pName: petName,
+          pSpecies: petSpecies,
+          pBreed: petBreed,
+          pColour: petColour,
         }
       })
-      if ((lostRes as any).status == 200){
-        apiData.value!.isMissing=true;
-      }
+        .then(editRes => {
+          if ((editRes as any).status == 200) {
+            alert('Pet information updated successfully!');
+          }
+          else {
+            alert('Failed to update pet information.');
+          }
+        })
+        .catch(error => {
+          console.error('Error updating pet information:', error);
+          alert('An error occurred while updating pet information.');
+        });
     },
 
+    async marklostFunc() {
+      const lostRes = await $fetch("/api/pet/marklost", {
+        method: "POST",
+        body: {
+          pid: this.$route.params.petID
+        }
+      })
+      if ((lostRes as any).status == 200) {
+        apiData.value!.isMissing = true;
+      }
+    },
   }
 };
 </script>
 
-<style>
-</style>
+<style></style>
