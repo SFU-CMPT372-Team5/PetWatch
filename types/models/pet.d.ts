@@ -22,19 +22,6 @@ export default interface PetModel extends LimitedPetModel {
             time: number //Unix Timestamp, Date::getTime() in node
         }
     },
-
-    contactDetails: { //In the future this will have to be changed to add privacy settings
-        name: string,
-        address: string,
-        phone: string,
-        additionalInfo?: [ //Optional
-            {
-                detailName: String,
-                detailValue: String
-            }
-        ]
-    },
-
     chats: string[]
 }
 

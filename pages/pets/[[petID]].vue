@@ -46,32 +46,41 @@
                             </VCardTitle>
                             <VCardText>
                               <VTextField v-if="editing" density="compact" :label="'Name'" variant="solo"
-                                v-model="petName" />
+                                v-model="petName" @input="handleNameChange" />
                               <p v-else>
                                 <b>Pet Name:</b> {{ petName }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <VTextField v-if="editing" density="compact" :label="'Species'" variant="solo"
-                                v-model="petSpecies" />
+                                v-model="petSpecies" @input="handleSpeciesChange" />
                               <p v-else>
                                 <b>Species:</b> {{ petSpecies }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <VTextField v-if="editing" density="compact" :label="'Breed'" variant="solo"
-                                v-model="petBreed" />
+                                v-model="petBreed" @input="handleBreedChange" />
                               <p v-else>
                                 <b>Breed:</b> {{ petBreed }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <VTextField v-if="editing" density="compact" :label="'Colour'" variant="solo"
-                                v-model="petColour" />
+                                v-model="petColour" @input="handleColourChange" />
                               <p v-else>
                                 <b>Colour:</b> {{ petColour }}
                               </p>
                             </VCardText>
+                            <VCardActions style="justify-content: right;">
+                              <VBtn color="pink-accent-1" variant="elevated" @click="startEdit()" v-if="!editing">
+                                <VIcon>mdi-pencil</VIcon>
+                              </VBtn>
+                              <template v-else>
+                                <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()">Cancel</VBtn>
+                                <VBtn color="success" variant="text" @click="submitEdit()">Save Changes</VBtn>
+                              </template>
+                            </VCardActions>
                           </VCard>
                         </VCol>
                         <VCol>
@@ -100,14 +109,6 @@
                       </VRow>
                     </VContainer>
                   </v-card-text>
-                  <VCardActions style="justify-content: center;">
-                    <VBtn color="blue-darken-2" variant="elevated" @click="startEdit()" v-if="!editing">Edit Information
-                    </VBtn>
-                    <template v-else>
-                      <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()">Cancel</VBtn>
-                      <VBtn color="success" variant="text" @click="submitEdit()">Save Changes</VBtn>
-                    </template>
-                  </VCardActions>
                 </v-card>
                 <VCard>
                   <VCardTitle>
@@ -121,7 +122,7 @@
                       <br />
                       {{ qrValue }}
                       <br />
-                      <VBtn @click="downloadQr" color="blue-darken-2">Download as Image</VBtn>
+                      <VBtn @click="downloadQr" color="indigo-lighten-1">Download as Image</VBtn>
                     </p>
                   </VCardText>
                 </VCard>
@@ -172,6 +173,7 @@ const petID = route.params.petID
 
 const { data: petApiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
 const { data: userApiData } = await useFetch<UserModel>(`/api/account/info`);
+
 let loaded = false;
 let hasData = false;
 
@@ -180,18 +182,13 @@ if (error.value == undefined) { //The pet is owned by this account and exists
 }
 loaded = true;
 
-var petName = petApiData.value!.petDetails.name;
-var petSpecies = petApiData.value!.petDetails.species;
-var petBreed = petApiData.value!.petDetails.breed ? petApiData.value!.petDetails.breed : 'N/A';
-var petColour = petApiData.value!.petDetails.colour;
-
 </script>
 
 <script lang="ts">
-import QrcodeVue from 'qrcode.vue'
+import QrcodeVue from 'qrcode.vue';
 import UserModel from 'types/models/user';
-import ChatCard from "~/components/petProfile/ChatCard.vue"
-import type PetModel from "~/types/models/pet"
+import ChatCard from "~/components/petProfile/ChatCard.vue";
+import type PetModel from "~/types/models/pet";
 
 export default {
   computed: {
@@ -211,6 +208,10 @@ export default {
   data() {
     return {
       editing: false,
+      petName: "",
+      petSpecies: "",
+      petBreed: "",
+      petColour: "",
     }
   },
   components: { QrcodeVue, ChatCard },
@@ -239,16 +240,17 @@ export default {
       this.editing = false;
     },
     async submitEdit() {
-      alert("Submitted");
+      this.editing = false;
       await $fetch("/api/pet/edit", {
-        method: "PUT",
+        method: "POST",
         body: {
           pId: this.$route.params.petID,
-          pName: petName,
-          pSpecies: petSpecies,
-          pBreed: petBreed,
-          pColour: petColour,
+          pName: this.petName,
+          pSpecies: this.petSpecies,
+          pBreed: this.petBreed,
+          pColour: this.petColour,
         }
+
       })
         .then(editRes => {
           if ((editRes as any).status == 200) {
@@ -261,8 +263,24 @@ export default {
         .catch(error => {
           console.error('Error updating pet information:', error);
           alert('An error occurred while updating pet information.');
-        });
+        }
+        );
     },
+
+    handleNameChange(event: any) {
+      this.petName = event.target.value;
+    },
+
+    handleSpeciesChange(event: any) {
+      this.petSpecies = event.target.value;
+    },
+    handleBreedChange(event: any) {
+      this.petBreed = event.target.value;
+    },
+    handleColourChange(event: any) {
+      this.petColour = event.target.value;
+    },
+
 
     async marklostFunc() {
       const lostRes = await $fetch("/api/pet/marklost", {
@@ -275,8 +293,28 @@ export default {
         petApiData.value!.isMissing = true;
       }
     },
+
+    async fetchPetData() {
+      const apiData = await $fetch(`/api/pet/${this.$route.params.petID}`);
+      if (apiData) {
+        this.petName = (apiData as PetModel)!.petDetails.name;
+        this.petSpecies = (apiData as PetModel)!.petDetails.species;
+        const breed = (apiData as PetModel)!.petDetails.breed;
+        if (breed != undefined) {
+          this.petBreed = breed;
+        }
+        else {
+          this.petBreed = "N/A";
+        }
+        this.petColour = (apiData as PetModel)!.petDetails.colour;
+      }
+    },
+  },
+  mounted() {
+    this.fetchPetData();
   }
 };
+
 </script>
 
 <style></style>

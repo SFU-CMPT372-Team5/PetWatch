@@ -10,25 +10,32 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
 
-  const { pid, petDetails, isMissing, missingDetails, contactDetails } = body;
+  const { pId, pName, pSpecies, pBreed, pColour } = body;
 
-  if (pid == undefined) {
+  if (pId == undefined) {
     console.log("pid undef");
     setResponseStatus(event, 400);
     return { status: 400, body: { error: "Bad Request" } };
   }
 
   try {
-    const updatedPet = await pet.findByIdAndUpdate(pid, {
-      petDetails,
-      isMissing,
-      missingDetails,
-      contactDetails,
-    });
+    const updatedPet = await pet.findOneAndUpdate(
+      { Pet_UID: pId, petOwnerID: token.sub },
+      {
+        petDetails: {
+          name: pName,
+          species: pSpecies,
+          breed: pBreed,
+          colour: pColour,
+        },
+      },
+      { new: true }
+    );
 
     if (updatedPet) {
       console.log("pet updated!");
-      return { message: "Pet updated successfully" };
+      setResponseStatus(event, 200);
+      return { status: 200, body: updatedPet, message: "Pet updated successfully"};
     } else {
       setResponseStatus(event, 404);
       console.log("pet NOT updated!");
