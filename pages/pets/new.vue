@@ -71,17 +71,11 @@ export default {
             petOwnerID: response.User_UID,
             petDetails: {
               name: this.name,
-              animalType: this.petType,
+              species: this.petType,
               colour: this.petColor,
-              animalBreed: this.breed
+              breed: this.breed
             },
-            isMissing: this.lostStatus === 'Lost',
-            contactDetails: {
-              name: response.userDetails.name,
-              address: response.userDetails.address,
-              phone: response.userDetails.phone,
-
-            }
+            isMissing: this.lostStatus === 'Lost'
           }
         }).catch(e => {
           console.error(e)

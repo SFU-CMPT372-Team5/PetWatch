@@ -81,17 +81,17 @@
                             </VCardTitle>
                             <VCardText>
                               <p>
-                                <b>Owner Name:</b> {{ apiData!.contactDetails.name }}
+                                <b>Owner Name:</b> {{ userApiData?.userDetails.name }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <p>
-                                <b>Address:</b> {{ apiData!.contactDetails.address }}
+                                <b>Address:</b> {{ userApiData?.userDetails.address }}
                               </p>
                             </VCardText>
                             <VCardText>
                               <p>
-                                <b>Phone Number:</b> {{ apiData!.contactDetails.phone }}
+                                <b>Phone Number:</b> {{ userApiData?.userDetails.phone }}
                               </p>
                             </VCardText>
 
@@ -134,7 +134,7 @@
             </VCardTitle>
             <VCardText>
               <VRow style="width: 100%">
-                <VCol v-if="!apiData?.isMissing">
+                <VCol v-if="!petApiData?.isMissing">
                   <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
                     <VCardActions style="justify-content: center;">
@@ -146,7 +146,7 @@
                   <h2 class="text-center">Chats</h2>
                   <VContainer>
                     <VRow justify="center">
-                      <VCol :cols="chatCardCols" v-for="chatID in apiData.chats">
+                      <VCol :cols="chatCardCols" v-for="chatID in petApiData.chats">
                         <ChatCard :chatID="chatID" />
                       </VCol>
                     </VRow>
@@ -170,7 +170,8 @@ const route = useRoute();
 
 const petID = route.params.petID
 
-const { data: apiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
+const { data: petApiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
+const { data: userApiData } = await useFetch<UserModel>(`/api/account/info`);
 let loaded = false;
 let hasData = false;
 
@@ -179,15 +180,16 @@ if (error.value == undefined) { //The pet is owned by this account and exists
 }
 loaded = true;
 
-var petName = apiData.value!.petDetails.name;
-var petSpecies = apiData.value!.petDetails.species;
-var petBreed = apiData.value!.petDetails.breed ? apiData.value!.petDetails.breed : 'N/A';
-var petColour = apiData.value!.petDetails.colour;
+var petName = petApiData.value!.petDetails.name;
+var petSpecies = petApiData.value!.petDetails.species;
+var petBreed = petApiData.value!.petDetails.breed ? petApiData.value!.petDetails.breed : 'N/A';
+var petColour = petApiData.value!.petDetails.colour;
 
 </script>
 
 <script lang="ts">
 import QrcodeVue from 'qrcode.vue'
+import UserModel from 'types/models/user';
 import ChatCard from "~/components/petProfile/ChatCard.vue"
 import type PetModel from "~/types/models/pet"
 
@@ -270,7 +272,7 @@ export default {
         }
       })
       if ((lostRes as any).status == 200) {
-        apiData.value!.isMissing = true;
+        petApiData.value!.isMissing = true;
       }
     },
   }
