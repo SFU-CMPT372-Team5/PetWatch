@@ -3,7 +3,7 @@
 <template>
   <v-container :class="loaded && !hasData ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
     style="flex-direction: column; transition: background-color 0.3s linear;">
-    <VFadeTransition group>
+    <VFadeTransition group leave-absolute>
       <template v-if="!loaded">
         <VRow justify="center" align="center" class="fill-height">
           <VCol>
@@ -135,11 +135,11 @@
             </VCardTitle>
             <VCardText>
               <VRow style="width: 100%">
-                <VCol v-if="!petApiData?.isMissing">
+                <VCol v-if="!isMissing">
                   <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
                     <VCardActions style="justify-content: center;">
-                      <VBtn @click="marklostFunc()" color="error" variant="elevated">Mark Pet as Lost</VBtn>
+                      <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>
                     </VCardActions>
                   </VCard>
                 </VCol>
@@ -150,6 +150,9 @@
                       <VCol :cols="chatCardCols" v-for="chat in activeChats">
                         <ChatCard :chatData="chat" :petID="(petID as string)"/>
                       </VCol>
+                    </VRow>
+                    <VRow justify="center">
+                      <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
                     </VRow>
                   </VContainer>
                 </VCol>
@@ -171,18 +174,8 @@ const route = useRoute();
 
 const petID = route.params.petID
 
-const { data: petApiData, error } = await useFetch<PetModel>(`/api/pet/${petID}`);
 const { data: userApiData } = await useFetch<UserModel>(`/api/account/info`);
 const {data: activeChats} = await useFetch<ChatModel[]>(`/api/pet/${petID}/chats`)
-
-let loaded = false;
-let hasData = false;
-
-if (error.value == undefined) { //The pet is owned by this account and exists
-  hasData = true;
-}
-loaded = true;
-
 </script>
 
 <script lang="ts">
@@ -209,6 +202,10 @@ export default {
   },
   data() {
     return {
+      hasData: false,
+      loaded: false,
+      isMissing: false,
+
       editing: false,
       petName: "",
       petSpecies: "",
@@ -284,36 +281,54 @@ export default {
     },
 
 
-    async marklostFunc() {
-      const lostRes = await $fetch("/api/pet/marklost", {
+    async setLost(newLostStatus: boolean) {
+      if (newLostStatus && this.isMissing) return;
+
+      const lostRes = await $fetch(`/api/pet/${this.$route.params.petID}/setLost`, {
         method: "POST",
         body: {
-          pid: this.$route.params.petID
+          status: newLostStatus
         }
       })
       if ((lostRes as any).status == 200) {
-        petApiData.value!.isMissing = true;
+        console.log("updated")
+        this.isMissing = newLostStatus
+
+        // FIXME temporary, because chat enrollment isn't updated here (yet)
+        if (newLostStatus == true) location.reload();
       }
     },
 
     async fetchPetData() {
-      const apiData = await $fetch(`/api/pet/${this.$route.params.petID}`);
-      if (apiData) {
-        this.petName = (apiData as PetModel)!.petDetails.name;
-        this.petSpecies = (apiData as PetModel)!.petDetails.species;
-        const breed = (apiData as PetModel)!.petDetails.breed;
-        if (breed != undefined) {
-          this.petBreed = breed;
+      try {
+        const apiData = await $fetch<PetModel>(`/api/pet/${this.$route.params.petID}`);
+        if (apiData) {
+          this.petName = apiData.petDetails.name;
+          this.petSpecies = apiData.petDetails.species;
+          const breed = apiData.petDetails.breed;
+          if (breed != undefined) {
+            this.petBreed = breed;
+          }
+          else {
+            this.petBreed = "N/A";
+          }
+          this.petColour = apiData.petDetails.colour;
+  
+          this.isMissing = apiData.isMissing;
+  
+          return true;
         }
-        else {
-          this.petBreed = "N/A";
-        }
-        this.petColour = (apiData as PetModel)!.petDetails.colour;
-      }
+      } catch(e) {}
+
+      return false;
     },
   },
-  mounted() {
-    this.fetchPetData();
+  async mounted() {
+    if (await this.fetchPetData()) {
+      this.hasData = true;
+    }
+
+    this.loaded=true;
   }
 };
 

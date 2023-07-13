@@ -131,10 +131,10 @@ export default {
                         text: m.text
                     })
                 })
+                this.refreshing = false;
             } catch(e) {
                 alert("error!");
             }
-            this.refreshing = false;
         },
         checkForNewMessages() {
             if (this.refreshing) return;
