@@ -26,7 +26,7 @@
           <VCard class="mb-1" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <VImg src="/images/paw.jpg" lazy-src="/images/paw.jpg" cover>
+                <VImg :src="petImageURL" lazy-src="/images/paw.jpg" cover>
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height">
                       <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
@@ -211,6 +211,7 @@ export default {
       petSpecies: "",
       petBreed: "",
       petColour: "",
+      petImageURL: ""
     }
   },
   components: { QrcodeVue, ChatCard },
@@ -322,6 +323,18 @@ export default {
 
       return false;
     },
+
+    async fetchPetPhotoURL() {
+      try {
+        const apiData = await $fetch(`/api/pet/${this.$route.params.petID}/photoUrl`);
+
+        if (apiData as string|undefined != undefined) {
+          this.petImageURL = apiData as string;
+        }
+      } catch(e) {
+        return ""
+      }
+    }
   },
   async mounted() {
     if (await this.fetchPetData()) {
@@ -329,6 +342,8 @@ export default {
     }
 
     this.loaded=true;
+
+    this.fetchPetPhotoURL();
   }
 };
 

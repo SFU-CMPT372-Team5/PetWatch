@@ -21,3 +21,6 @@ logs
 .env
 .env.*
 !.env.example
+
+# GCP Secrets
+gcp_service_account.json
