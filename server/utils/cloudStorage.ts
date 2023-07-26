@@ -1,5 +1,5 @@
 import { Storage } from "@google-cloud/storage";
-
+const BUCKET_NAME = "petwatch-images";
 
 export type TypeCloudStorageManager = typeof CloudStorageManager
 class CloudStorageManager {
@@ -22,8 +22,9 @@ class CloudStorageManager {
 
     async getPetImageUrl(petID: string) {
         try {
-            const file = this.Storage.bucket("petwatch-images").file(petID)
-            const exists = await file.exists();
+            const file = this.Storage.bucket(BUCKET_NAME).file(petID)
+            const [exists] = await file.exists();
+            console.log(exists)
 
             if (exists) {
                 const url = file.publicUrl();
@@ -33,6 +34,16 @@ class CloudStorageManager {
             }
         } catch(e) {}
         return undefined;
+    }
+
+    async upload(petID: string) {
+        try {
+            const file = this.Storage.bucket(BUCKET_NAME).file(petID);
+
+            file.save()
+
+            
+        }
     }
 }
 

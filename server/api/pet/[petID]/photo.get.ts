@@ -2,7 +2,7 @@
 // FIXME, is this the best-idea??
 
 
-import {TypeCloudStorageManager, getManagerInstance} from "~/server/utils/cloudStorage"
+import {getManagerInstance} from "~/server/utils/cloudStorage"
 
 export default defineEventHandler(async e => {
     const potentialUrl = await getManagerInstance().getPetImageUrl(e.context.params.petID);
