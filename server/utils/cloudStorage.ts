@@ -64,6 +64,18 @@ class CloudStorageManager {
             //
         }
     }
+
+    async delete(petID: string, imageExt: string) {
+        const fileName = `${petID}.${imageExt}`
+        
+        try {
+            await this.Storage.bucket(BUCKET_NAME).file(fileName).delete();
+
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }
 }
 
 export function getManagerInstance() {

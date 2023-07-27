@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
 
   //Let's start by attempting to find the pet, this way we know it exists before we potentially upload an image to GCP
   let petKey;
+  let existingImageUrl
   try {
     const existingPet = await pet.findOne({
       Pet_UID: event.context.params!.petID, petOwnerID: token.sub
@@ -30,7 +31,8 @@ export default defineEventHandler(async (event) => {
       return { status: 401, message: "Pet not found/no access rights"};
     }
 
-    petKey = existingPet?._id;
+    petKey = existingPet!._id;
+    existingImageUrl = existingPet!.imageURL;
   } catch(e) {
     setResponseStatus(event, 404);
     return { status: 401, message: "Pet not found/no access rights"};
@@ -67,9 +69,9 @@ export default defineEventHandler(async (event) => {
 
   let resultImgURL;
   if (imageEntry != undefined && imageEntry.type) {
+    
     //Is an image-type file
     const fileExt = imageEntry.filename?.split('.').pop();
-
     if (fileExt == undefined) return;
 
     const fileUploadRes = await getManagerInstance().upload(
@@ -79,6 +81,26 @@ export default defineEventHandler(async (event) => {
       fileExt
     );
 
+    //Attempt to delete the old image if the new image doesn't share the same file extension 
+    //(prevents zombie files but ensures the image was replaced before deleting the old one)
+    if (fileUploadRes != undefined) {
+      const existingUrlSegments = existingImageUrl?.split(".");
+      //File ext is last dot
+
+      if (existingUrlSegments != undefined && existingUrlSegments?.length > 1) { //Proves at least 1 dot exists
+        const existingFileExt = existingUrlSegments[existingUrlSegments?.length - 1]
+
+        //Make sure not to delete the image if the new file ext is the same as the old one
+        //In this case, GCP will automatically delete the old file by replacing it with a file of the exact same name
+
+        if (existingFileExt != fileExt) {
+          //Delete the existing image
+          await getManagerInstance().delete(event.context.params!.petID, existingFileExt);
+        }        
+      }
+    }
+
+    //Do this regardless
     resultImgURL = fileUploadRes;
   }
 
