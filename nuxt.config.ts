@@ -18,8 +18,10 @@ export default defineNuxtConfig({
 
   auth: {
     isEnabled: true,
-    defaultProvider: "auth0",
-    origin: process.env.AUTH_ORIGIN
+    provider: {
+      defaultProvider: "auth0",
+      type: "authjs"
+    }
   },
 
   // Tell Nuxt to load Vuetify css
