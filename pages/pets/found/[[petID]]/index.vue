@@ -51,7 +51,7 @@
                                         <VCard height="100%">
                                             <VCardTitle><h3 class=text-center>Owner Contact Details</h3></VCardTitle>
                                             <VCardText>
-                                                <ContactDetails :data="(petData as PetModel)"/>
+                                                <ContactDetails :data="(contactData)"/>
                                             </VCardText>
                                         </VCard>
                                         </VCol>
@@ -129,6 +129,8 @@
 const route = useRoute();
 
 const limitedDataRes = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
+const contactDataRes = await useLazyFetch(`/api/pet/${route.params.petID}/contactDetails`);
+const contactData = contactDataRes.data;
 const petData = limitedDataRes.data;
 const pending = limitedDataRes.pending;
 
