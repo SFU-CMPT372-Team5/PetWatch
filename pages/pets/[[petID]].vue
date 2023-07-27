@@ -32,8 +32,6 @@
                       <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
                     </div>
                   </template>
-                  <template #error>
-                  </template>
                   <VFadeTransition>
                     <VBtn 
                       location="center" 
@@ -197,7 +195,7 @@ export default {
       
       isUploadingNewImage: false, //Loading spinner for uploading a file
       uploadedImageData: undefined as File|undefined,
-      inEditImageURL: undefined as undefined|string
+      inEditImageURL: undefined as undefined|string,
     }
   },
   components: { QrcodeVue, ChatCard, PetDetails },
@@ -269,21 +267,25 @@ export default {
       const editSubmit = new FormData();
 
       //Get details from PetDetails component
-      const petDetails = (this.$refs.petDetails as any).data;
-      debugger;
+      const isValid = await (this.$refs.petDetails as typeof PetDetails).validate();
+      const newPetDetails = (this.$refs.petDetails as typeof PetDetails).curValues;
 
-      if (petDetails == undefined) return;
+      if (!isValid || newPetDetails == undefined) {
+        this.submitting = false;
+        this.submitError = true;
+        return;
+      }
 
-      petDetails.petName != undefined && petDetails.petName.length > 0 ? editSubmit.append("petName", petDetails.petName) : null;
-      petDetails.petSpecies != undefined && petDetails.petSpecies.length > 0 ? editSubmit.append("petSpecies", petDetails.petSpecies) : null;
-      petDetails.petBreed != undefined && petDetails.petBreed.length > 0 ? editSubmit.append("petBreed", petDetails.petBreed) : null;
-      petDetails.petColour != undefined && petDetails.petColour.length > 0 ? editSubmit.append("petColour", petDetails.petColour) : null;
+      newPetDetails.name != undefined && newPetDetails.name.length > 0 ? editSubmit.append("name", newPetDetails.name) : null;
+      newPetDetails.species != undefined && newPetDetails.species.length > 0 ? editSubmit.append("species", newPetDetails.species) : null;
+      newPetDetails.breed != undefined && newPetDetails.breed.length > 0 ? editSubmit.append("breed", newPetDetails.breed) : null;
+      newPetDetails.colour != undefined && newPetDetails.colour.length > 0 ? editSubmit.append("colour", newPetDetails.colour) : null;
 
       if (this.uploadedImageData != undefined) { //Potentially new image uploaded
         editSubmit.append("image", this.uploadedImageData);
       }
 
-      debugger;
+      console.log(editSubmit);
 
       try {
         const editRes = await $fetch(`/api/pet/${this.$route.params.petID}/edit`, {
@@ -297,6 +299,18 @@ export default {
             this.editing = false;
             this.submitError = false;
             this.petData!.imageURL = this.inEditImageURL;
+            
+            for (const pair of editSubmit.entries()) {
+              switch(pair[0]) {
+                case "name":
+                case "species":
+                case "breed":
+                case "colour":
+                  this.petData!.petDetails[pair[0]] = pair[1].toString().trim()
+                  break;
+              }
+            }
+            
           }, 300)
         } else {
           this.submitError = true;
@@ -309,10 +323,6 @@ export default {
         console.error('Error updating pet information:', e);
         alert('An error occurred while updating pet information.');
       }
-      await $fetch(`/api/pet/${this.$route.params.petID}/edit`, {
-        method: "PATCH",
-        body: editSubmit
-      })
     },
 
     triggerImageUpload() {
