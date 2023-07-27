@@ -285,8 +285,6 @@ export default {
         editSubmit.append("image", this.uploadedImageData);
       }
 
-      console.log(editSubmit);
-
       try {
         const editRes = await $fetch(`/api/pet/${this.$route.params.petID}/edit`, {
           method: "POST",
@@ -298,6 +296,7 @@ export default {
             this.submitting = false;
             this.editing = false;
             this.submitError = false;
+            this.isUploadingNewImage = false; //Because the new image is now the "original"
             this.petData!.imageURL = this.inEditImageURL;
             
             for (const pair of editSubmit.entries()) {
@@ -337,7 +336,6 @@ export default {
 
     handleImageChange(event: Event) {
       if ((event.target as HTMLInputElement)?.files && (event.target as HTMLInputElement).files!.length > 0) {
-        debugger;
         this.uploadedImageData = (event.target as HTMLInputElement).files![0];
         this.inEditImageURL = URL.createObjectURL(this.uploadedImageData);
       }
