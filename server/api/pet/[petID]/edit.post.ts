@@ -1,5 +1,6 @@
-import { pet } from "../../mongo/models";
+import { pet } from "../../../mongo/models";
 import { getToken } from "#auth";
+import {readFiles} from "h3-formidable"
 
 export default defineEventHandler(async (event) => {
   const token = await getToken({ event });
@@ -10,17 +11,13 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event);
 
-  const { pId, pName, pSpecies, pBreed, pColour } = body;
+  console.dir(body); return;
 
-  if (pId == undefined) {
-    console.log("pid undef");
-    setResponseStatus(event, 400);
-    return { status: 400, body: { error: "Bad Request" } };
-  }
+  const { pName, pSpecies, pBreed, pColour } = body;
 
   try {
     const updatedPet = await pet.findOneAndUpdate(
-      { Pet_UID: pId, petOwnerID: token.sub },
+      { Pet_UID: event.context.params.petID, petOwnerID: token.sub },
       {
         petDetails: {
           name: pName,

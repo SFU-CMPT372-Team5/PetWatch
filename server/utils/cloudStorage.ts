@@ -40,9 +40,11 @@ class CloudStorageManager {
         try {
             const file = this.Storage.bucket(BUCKET_NAME).file(petID);
 
-            file.save()
+            // file.save()
 
             
+        } catch(e) {
+            //
         }
     }
 }

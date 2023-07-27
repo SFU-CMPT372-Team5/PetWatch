@@ -1,9 +1,9 @@
 <template>
     <VList>
-        <template v-for="detail in expectedPetDetails">
-            <VListItem v-if="data?.contactDetails[detail.key] != undefined"
+        <template v-for="detail in expectedContactDetails">
+            <VListItem
                 :title="detail.displayName"
-                :subtitle="data?.contactDetails[detail.key] as string"
+                :subtitle="data?.userDetails[detail.key] as string ?? 'Not Provided'"
             />
         </template>
     </VList>
@@ -11,20 +11,20 @@
 
 <script lang="ts">
 import type { PropType } from 'vue';
-import type PetModel from "~/types/models/pet"
+import type UserModel from "~/types/models/user"
 
 export default {
     props: {
-        data: Object as PropType<PetModel>
+        data: Object as PropType<UserModel>
     },
     data() {
         return {
-            expectedPetDetails: [
+            expectedContactDetails: [
                 {key: "name", displayName: "Owner's Name"},
                 {key: "address", displayName: "Address"},
                 {key: "phone", displayName: "Phone Number"},
             ] as {
-                key: keyof PetModel['contactDetails'],
+                key: keyof UserModel['userDetails'],
                 displayName: string
             }[]
         }
