@@ -15,6 +15,7 @@
     "nuxt": "^3.6.2"
   },
   "dependencies": {
+    "@fawmi/vue-google-maps": "0.9.67",
     "@mdi/font": "^7.2.96",
     "@sidebase/nuxt-auth": "^0.6.0-beta.3",
     "luxon": "^3.3.0",
