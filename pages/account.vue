@@ -55,7 +55,8 @@
                                         <VCardTitle class="text-center">{{ pet.petDetails.name }}</VCardTitle>
                                         <VImg src="/images/paw.jpg" cover />
                                         <div class="d-flex justify-end mb-3 mt-3">
-                                            <VBtn class="mr-3" color="error" variant="elevated" @click="deletePet(pet)">
+                                            <VBtn class="mr-3" color="error" variant="elevated"
+                                                @click="showConfirmationDialog = true">
                                                 <v-tooltip activator="parent" location="start">Delete Pet</v-tooltip>
                                                 <VIcon>mdi-delete</VIcon>
                                             </VBtn>
@@ -66,7 +67,26 @@
                                                 <VIcon>mdi-open-in-new</VIcon>
                                             </VBtn>
                                         </div>
+
+                                        <!-- Confirmation Dialog -->
+                                        <v-dialog v-model="showConfirmationDialog" max-width="500">
+                                            <v-card>
+                                                <v-card-title
+                                                class="text-center font-weight-bold"
+                                                >Delete Confirmation</v-card-title>
+                                                <v-card-text>Are you sure you want to delete {{ pet.petDetails.name
+                                                }}?</v-card-text>
+                                                <v-card-actions
+                                                class="d-flex justify-end mb-3 mt-3"
+                                                >
+                                                    <VBtn color="red" @click="showConfirmationDialog = false">Cancel
+                                                    </VBtn>
+                                                    <VBtn color="green" @click="deletePet(pet)">Delete</VBtn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
                                     </VCard>
+
 
                                 </VCol>
                                 <VCol v-else>
@@ -105,6 +125,7 @@ export default {
     data() {
         return {
             isEditing: false,
+            showConfirmationDialog: false,
             userDetails: {
                 name: "",
                 address: "",
@@ -179,6 +200,7 @@ export default {
         },
 
         async deletePet(pet: PetModel) {
+            this.showConfirmationDialog = false;
             const id = pet.Pet_UID;
             const name = pet.petDetails.name;
 
@@ -188,7 +210,6 @@ export default {
                 });
 
                 if (deleteRes.status === 200) {
-                    alert(`${name} has been removed from your account!`);
                     window.location.reload();
                 } else {
                     alert(`Failed to delete ${name}.`);
@@ -197,6 +218,7 @@ export default {
                 console.error('Error deleting pet:', error);
                 alert(`An error occurred while deleting ${name}.`);
             }
+
         },
 
     },
