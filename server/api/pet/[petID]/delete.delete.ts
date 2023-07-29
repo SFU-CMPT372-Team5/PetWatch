@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     const id = event.context.params.petID;
 
     try {
-      // Check if the owner of the pet matches the logged-in user
+      // Firstly, check if the owner of the pet matches the logged-in user
       const existingPet = await pet.findOne({
         Pet_UID: id,
         petOwnerID: token.sub,
@@ -24,15 +24,27 @@ export default defineEventHandler(async (event) => {
         return { status: 401, message: "Pet not found/no access rights" };
       }
 
-      // Delete Pet
+      // Secondly, try to delete pet image
+      const petImageUrl = existingPet.imageURL;
+      let imageDeleted = false;
+
+      if(petImageUrl != undefined){
+        imageDeleted = await getManagerInstance().delete(id, petImageUrl);
+      }
+
+      if(imageDeleted == false) {
+        return { status: 404, message: "Pet image not found" };
+      }
+      
+      // Lastly, try to delete the pet
       const deletedPet = await pet.findOneAndDelete({ Pet_UID: id });
+
       if (deletedPet) {
         return { status: 200, message: "Pet deleted successfully" };
       } else {
         return { status: 404, message: "Pet not found" };
       }
     } catch (error) {
-      console.error("Error deleting pet:", error);
       setResponseStatus(event, 500);
       return { status: 500, body: { error: "Server error" } };
     }
