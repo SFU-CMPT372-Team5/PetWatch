@@ -6,3 +6,5 @@ AUTH_SECRET=<some random string>
 
 AUTH_ORIGIN=<address of this server eg: http://localhost:3000>
 NEXTAUTH_URL=<Same as AUTH_ORIGIN>
+
+NUXT_PUBLIC_GOOGLE_KEY=<Google cloud api key>
