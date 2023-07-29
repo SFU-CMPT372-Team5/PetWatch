@@ -43,7 +43,8 @@
                                 </v-btn>
                             </template>
                             <template v-else>
-                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="toAccount">
+                                <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined
+                                    @click="toAccount">
                                     My Account
                                 </v-btn>
                                 <v-btn color="white" class="bg-blue-accent-1" dark elevation="2" outlined @click="signOut">
@@ -54,10 +55,10 @@
                     </v-card>
                 </v-col>
                 <v-col cols="10" md="5" class="d-flex justify-center">
-                    <v-img src="/public/images/appicon.png"></v-img>
+                    <v-img src="/images/appicon.png"></v-img>
                 </v-col>
             </v-row>
-            <v-spacer  id="about"></v-spacer>
+            <v-spacer id="about"></v-spacer>
         </v-container>
         <v-container fluid class="pt-10 pb-10">
             <v-row class="text-center">
@@ -78,7 +79,8 @@
                             create an account, and input your contact information and any essential details about you furry
                             companions. In return, we provide a unique QR code for each of your pets. The magic happens when
                             a
-                            personalized QR code is printed and delicately attached to your furry friend's collar. In the unfortunate event that a pet goes missing, our app acts as a
+                            personalized QR code is printed and delicately attached to your furry friend's collar. In the
+                            unfortunate event that a pet goes missing, our app acts as a
                             bridge between concerned citizens, whom we fondly refer to as "finders," and pet owners. By
                             simply
                             scanning the QR code on a lost pet's collar, finders gain instant access to vital contact
@@ -99,7 +101,7 @@
             <v-row class="text-center d-flex flex-wrap pa-5">
                 <v-col cols="12" md="4">
                     <v-card class="d-flex justify-center align-center flex-column pa-5 bg-indigo-lighten-3">
-                        <v-img src="/public/images/qr.png" height="100" width="100"></v-img>
+                        <v-img src="/images/qr.png" height="100" width="100"></v-img>
 
                         <v-card-title>
                             <h2>QR Code</h2>
@@ -115,7 +117,7 @@
                 </v-col>
                 <v-col cols="12" md="4">
                     <v-card class="d-flex justify-center align-center flex-column pa-5 bg-indigo-lighten-3">
-                        <v-img class="text-center" src="/public/images/pet-map.png" height="100" width="100"></v-img>
+                        <v-img class="text-center" src="/images/pet-map.png" height="100" width="100"></v-img>
 
                         <v-card-title>
                             <h2>Mapping</h2>
@@ -131,20 +133,22 @@
                 </v-col>
                 <v-col cols="12" md="4">
                     <v-card class="d-flex justify-center align-center flex-column pa-5 bg-indigo-lighten-3">
-                        <v-img src="/public/images/chat.png" height="100" width="100"></v-img>
+                        <v-img src="/images/chat.png" height="100" width="100"></v-img>
 
                         <v-card-title>
                             <h2>Chat</h2>
                         </v-card-title>
 
                         <v-card-text>
-                            <p>With open lines of communication and a shared goal of bringing joy and relief, finders and owners can work hand in hand using our chat feature. This direct communication channel between pet finders and owners can significantly streamline the process of reuniting lost
-                            pets with their rightful guardians.</p>
+                            <p>With open lines of communication and a shared goal of bringing joy and relief, finders and
+                                owners can work hand in hand using our chat feature. This direct communication channel
+                                between pet finders and owners can significantly streamline the process of reuniting lost
+                                pets with their rightful guardians.</p>
                         </v-card-text>
                     </v-card>
                 </v-col>
             </v-row>
-            <v-spacer  id="contact"></v-spacer>
+            <v-spacer id="contact"></v-spacer>
         </v-container>
 
         <v-footer class="bg-red-lighten-4 text-center d-flex flex-column p-10 p-md-5">
@@ -158,10 +162,11 @@
                         required></v-text-field>
                     <v-text-field class="my-6" v-model="email" :rules="emailRules" label="E-mail" dense
                         required></v-text-field>
-                    <v-textarea class="my-6" v-model="email" :rules="messageRules" label="Messsage" dense
+                    <v-textarea class="my-6" v-model="message" :rules="messageRules" label="Messsage" dense
                         required></v-textarea>
-                    <v-btn type="submit" color="pink-darken-1" class="mb-6" dark
-                        style="font-family: 'Roboto', sans-serif; font-size: 20px; width: 100%; height: 2.5rem;">
+                    <v-btn color="pink-darken-1" class="mb-6" dark
+                        style="font-family: 'Roboto', sans-serif; font-size: 20px; width: 100%; height: 2.5rem;"
+                        @click="submitQuestions()">
                         Submit
                     </v-btn>
                 </v-container>
@@ -176,7 +181,9 @@
 
 
 <script lang="ts">
-const {signIn, signOut, getSession, status} = useAuth();
+import emailjs from '@emailjs/browser';
+
+const { signIn, signOut, getSession, status } = useAuth();
 
 export default {
     computed: {
@@ -241,13 +248,32 @@ export default {
         },
         signOut() {
             return signOut();
+        },
+        submitQuestions() {       
+            emailjs.init('qM5O9B4X9jYSRNguq');
+            
+            emailjs.send(
+                'service_6pc0hhb',
+                'template_r2dq36s',
+                {
+                    from_name: `${this.firstname} ${this.lastname}`,
+                    to_name: "PetWatch",
+                    email_id: this.email,
+                    message: this.message,
+                }
+            ).then((result) => {
+                    console.log('SUCCESS!', result.text);
+                }, (error) => {
+                    console.log('FAILED...', error.text);
+                });
         }
     }
 };
 </script>
 
-<style scoped>.bg-image-pink {
-    background-image: url('/public/images/paw.jpg');
+<style scoped>
+.bg-image-pink {
+    background-image: url('/images/paw.jpg');
     background-size: cover;
     background-position: center;
 }
