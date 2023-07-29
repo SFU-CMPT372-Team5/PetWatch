@@ -44,9 +44,15 @@
                         </VContainer>
                     </v-card>
                     <VCard class="mt-3">
-                        <VCardText>
-                            <span class="text-h5">Your Pets</span>
+                        <VRow class="mt-3">
+                            <VCardText>
+                            <span class="text-h5 ml-3">Your Pets</span>
                         </VCardText>
+                        <VCardActions class="mr-6" style="justify-content: end">
+                            <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                new Pet</VBtn>
+                        </VCardActions>
+                        </VRow>
                         <VContainer fluid>
                             <VRow justify="center">
                                 <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
@@ -90,10 +96,6 @@
                                         <VCardText>Add a pet to your profile by clicking below</VCardText>
                                     </VCard>
                                 </VCol>
-                                <VCardActions style="justify-content: center">
-                                    <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                        new Pet</VBtn>
-                                </VCardActions>
                             </VRow>
                         </VContainer>
                     </VCard>
@@ -200,7 +202,7 @@ export default {
             const name = pet.petDetails.name;
 
             try {
-                const deleteRes = await $fetch(`/api/pet/delete/${id}`, {
+                const deleteRes = await $fetch(`/api/pet/${id}/delete`, {
                     method: "DELETE",
                 });
 
