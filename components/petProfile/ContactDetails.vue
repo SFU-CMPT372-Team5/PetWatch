@@ -1,26 +1,32 @@
 <template>
     <VList>
-        <template v-if="data != undefined" v-for="detail in expectedPetDetails">
-            <VListItem v-if="data[detail.key] != undefined"
+        <template v-for="detail in expectedContactDetails">
+            <VListItem
                 :title="detail.displayName"
-                :subtitle="(data[detail.key] as string)"
+                :subtitle="data?.userDetails[detail.key] as string ?? 'Not Provided'"
             />
         </template>
     </VList>
 </template>
 
 <script lang="ts">
+import type { PropType } from 'vue';
+import type UserModel from "~/types/models/user"
+
 export default {
     props: {
-        data: Object
+        data: Object as PropType<UserModel>
     },
     data() {
         return {
-            expectedPetDetails: [
+            expectedContactDetails: [
                 {key: "name", displayName: "Owner's Name"},
                 {key: "address", displayName: "Address"},
                 {key: "phone", displayName: "Phone Number"},
-            ]
+            ] as {
+                key: keyof UserModel['userDetails'],
+                displayName: string
+            }[]
         }
     }
 }

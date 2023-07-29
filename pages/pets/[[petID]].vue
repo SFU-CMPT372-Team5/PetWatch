@@ -1,10 +1,10 @@
 <!-- Pet profile -->
 
 <template>
-  <v-container :class="loaded && !hasData ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
+  <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
     style="flex-direction: column; transition: background-color 0.3s linear;">
     <VFadeTransition group leave-absolute>
-      <template v-if="!loaded">
+      <template v-if="petPending">
         <VRow justify="center" align="center" class="fill-height">
           <VCol>
             <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
@@ -12,7 +12,7 @@
         </VRow>
       </template>
       <template v-else>
-        <template v-if="!hasData">
+        <template v-if="petData == undefined">
           <VRow justify="center" align="center" class="fill-height">
             <VCol>
               <VCard class=text-center>
@@ -26,12 +26,31 @@
           <VCard class="mb-1" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <VImg src="/images/paw.jpg" lazy-src="/images/paw.jpg" cover>
+                <VImg :src="imageUrl" :lazy-src="placeholderImgURL" cover >
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height">
                       <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
                     </div>
                   </template>
+                  <VFadeTransition>
+                    <VBtn 
+                      location="center" 
+                      prepend-icon="mdi-upload" 
+                      text="Upload Image" 
+                      color="green-darken-1"
+                      @click="triggerImageUpload"
+                      :loading="isUploadingNewImage"
+                      v-if="editing"
+                      :disabled="submitting"
+                    />
+                  </VFadeTransition>
+                  <input 
+                    ref="imgUploader"
+                    class="d-none"
+                    type="file"
+                    @change="handleImageChange"
+                    accept="image/*"
+                    />
                 </VImg>
               </VCol>
               <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
@@ -44,41 +63,16 @@
                             <VCardTitle>
                               <h3 class=text-center>Pet Details</h3>
                             </VCardTitle>
-                            <VCardText>
-                              <VTextField v-if="editing" density="compact" :label="'Name'" variant="solo"
-                                v-model="petName" @input="handleNameChange" />
-                              <p v-else>
-                                <b>Pet Name:</b> {{ petName }}
-                              </p>
-                            </VCardText>
-                            <VCardText>
-                              <VTextField v-if="editing" density="compact" :label="'Species'" variant="solo"
-                                v-model="petSpecies" @input="handleSpeciesChange" />
-                              <p v-else>
-                                <b>Species:</b> {{ petSpecies }}
-                              </p>
-                            </VCardText>
-                            <VCardText>
-                              <VTextField v-if="editing" density="compact" :label="'Breed'" variant="solo"
-                                v-model="petBreed" @input="handleBreedChange" />
-                              <p v-else>
-                                <b>Breed:</b> {{ petBreed }}
-                              </p>
-                            </VCardText>
-                            <VCardText>
-                              <VTextField v-if="editing" density="compact" :label="'Colour'" variant="solo"
-                                v-model="petColour" @input="handleColourChange" />
-                              <p v-else>
-                                <b>Colour:</b> {{ petColour }}
-                              </p>
-                            </VCardText>
+
+                            <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails"/>
+
                             <VCardActions style="justify-content: right;">
                               <VBtn color="pink-accent-1" variant="elevated" @click="startEdit()" v-if="!editing">
                                 <VIcon>mdi-pencil</VIcon>
                               </VBtn>
                               <template v-else>
-                                <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()">Cancel</VBtn>
-                                <VBtn color="success" variant="text" @click="submitEdit()">Save Changes</VBtn>
+                                <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()" :disabled="submitting">Cancel</VBtn>
+                                <VBtn :color="submitError ? 'error': 'success'" variant="text" @click="submitEdit()" :loading="submitting">Save Changes</VBtn>
                               </template>
                             </VCardActions>
                           </VCard>
@@ -88,22 +82,7 @@
                             <VCardTitle>
                               <h3 class=text-center>Contact Details</h3>
                             </VCardTitle>
-                            <VCardText>
-                              <p>
-                                <b>Owner Name:</b> {{ userApiData?.userDetails.name }}
-                              </p>
-                            </VCardText>
-                            <VCardText>
-                              <p>
-                                <b>Address:</b> {{ userApiData?.userDetails.address }}
-                              </p>
-                            </VCardText>
-                            <VCardText>
-                              <p>
-                                <b>Phone Number:</b> {{ userApiData?.userDetails.phone }}
-                              </p>
-                            </VCardText>
-
+                            <PetProfileContactDetails :data="userData"/>
                           </VCard>
                         </VCol>
                       </VRow>
@@ -135,7 +114,7 @@
             </VCardTitle>
             <VCardText>
               <VRow style="width: 100%">
-                <VCol v-if="!isMissing">
+                <VCol v-if="!petData.isMissing">
                   <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
                     <VCardActions style="justify-content: center;">
@@ -147,8 +126,8 @@
                   <h2 class="text-center">Chats</h2>
                   <VContainer>
                     <VRow justify="center">
-                      <VCol :cols="chatCardCols" v-for="chat in activeChats">
-                        <ChatCard :chatData="chat" :petID="(petID as string)"/>
+                      <VCol :cols="chatCardCols" v-for="chat in chatData">
+                        <ChatCard :chatData="chat" :petID="(chat.petID as string)"/>
                       </VCol>
                     </VRow>
                     <VRow justify="center">
@@ -165,25 +144,15 @@
   </v-container>
 </template>
 
-<script lang="ts" setup>
-definePageMeta({
-  middleware: ["auth"]
-})
-
-const route = useRoute();
-
-const petID = route.params.petID
-
-const { data: userApiData } = await useFetch<UserModel>(`/api/account/info`);
-const {data: activeChats} = await useFetch<ChatModel[]>(`/api/pet/${petID}/chats`)
-</script>
-
 <script lang="ts">
 import QrcodeVue from 'qrcode.vue';
 import UserModel from 'types/models/user';
 import ChatCard from "~/components/petProfile/ChatCard.vue";
+import PetDetails from "~/components/petProfile/PetDetails.vue"
 import type PetModel from "~/types/models/pet";
 import type ChatModel from 'types/models/chat'
+
+const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
 
 export default {
   computed: {
@@ -198,22 +167,74 @@ export default {
       if (this.$vuetify.display.md) return 4;
       if (this.$vuetify.display.sm) return 6;
       return 12;
+    },
+
+    imageUrl() {
+      if (this.editing) {
+        if (this.uploadedImageData != undefined) {
+          return URL.createObjectURL(this.uploadedImageData)
+        }
+      }
+
+      if (this.petData?.imageURL != undefined && this.petData?.imageURL?.length > 0) {
+        return this.petData.imageURL;
+      }
+
+      return PLACEHOLDER_IMAGE_URL;
+    },
+    placeholderImgURL() {
+      return PLACEHOLDER_IMAGE_URL
     }
   },
   data() {
     return {
-      hasData: false,
-      loaded: false,
-      isMissing: false,
-
       editing: false,
-      petName: "",
-      petSpecies: "",
-      petBreed: "",
-      petColour: "",
+
+      submitting: false, //Loading spinner for save changes
+      submitError: false,
+      
+      isUploadingNewImage: false, //Loading spinner for uploading a file
+      uploadedImageData: undefined as File|undefined,
+      inEditImageURL: undefined as undefined|string,
     }
   },
-  components: { QrcodeVue, ChatCard },
+  components: { QrcodeVue, ChatCard, PetDetails },
+  setup() {
+    definePageMeta({
+      middleware: ["auth"]
+    })
+
+    const route = useRoute();
+
+    let userData = ref(undefined as UserModel|undefined);
+    let petData = ref(undefined as PetModel|undefined);
+    let chatData = ref(undefined as ChatModel[]|undefined);
+
+    let userPending = ref(true);
+    let petPending = ref(true);
+    let chatPending = ref(true);
+    $fetch<UserModel>(`/api/account/info`)
+    .then((userRes) => {
+      userData.value = userRes;
+    })
+    .finally(() => userPending.value = false);
+    
+    $fetch<PetModel>(`/api/pet/${route.params.petID}`)
+    .then((petRes) => {
+      petData.value = petRes;
+
+      if (petRes.isMissing) {
+        $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
+        .then((chatRes) => {
+          chatData.value = chatRes;
+        })
+        .finally(() => chatPending.value = false);
+      }
+    })
+    .finally(() => petPending.value = false);
+
+    return {userData, petData, chatData, userPending, petPending, chatPending};
+  },
   methods: {
     downloadQr() {
       //https://github.com/scopewu/qrcode.vue/issues/50
@@ -233,56 +254,96 @@ export default {
       xhr.send();
     },
     startEdit() {
+      this.uploadedImageData = undefined;
+      this.inEditImageURL = this.petData?.imageURL;
       this.editing = true;
     },
     cancelEdit() {
       this.editing = false;
     },
     async submitEdit() {
-      this.editing = false;
-      await $fetch("/api/pet/edit", {
-        method: "POST",
-        body: {
-          pId: this.$route.params.petID,
-          pName: this.petName,
-          pSpecies: this.petSpecies,
-          pBreed: this.petBreed,
-          pColour: this.petColour,
-        }
+      this.submitting = true;
 
-      })
-        .then(editRes => {
-          if ((editRes as any).status == 200) {
-            alert('Pet information updated successfully!');
-          }
-          else {
-            alert('Failed to update pet information.');
-          }
+      const editSubmit = new FormData();
+
+      //Get details from PetDetails component
+      const isValid = await (this.$refs.petDetails as typeof PetDetails).validate();
+      const newPetDetails = (this.$refs.petDetails as typeof PetDetails).curValues;
+
+      if (!isValid || newPetDetails == undefined) {
+        this.submitting = false;
+        this.submitError = true;
+        return;
+      }
+
+      newPetDetails.name != undefined && newPetDetails.name.length > 0 ? editSubmit.append("name", newPetDetails.name) : null;
+      newPetDetails.species != undefined && newPetDetails.species.length > 0 ? editSubmit.append("species", newPetDetails.species) : null;
+      newPetDetails.breed != undefined && newPetDetails.breed.length > 0 ? editSubmit.append("breed", newPetDetails.breed) : null;
+      newPetDetails.colour != undefined && newPetDetails.colour.length > 0 ? editSubmit.append("colour", newPetDetails.colour) : null;
+
+      if (this.uploadedImageData != undefined) { //Potentially new image uploaded
+        editSubmit.append("image", this.uploadedImageData);
+      }
+
+      try {
+        const editRes = await $fetch(`/api/pet/${this.$route.params.petID}/edit`, {
+          method: "POST",
+          body: editSubmit
         })
-        .catch(error => {
-          console.error('Error updating pet information:', error);
-          alert('An error occurred while updating pet information.');
+
+        if (editRes.status == 200) {
+          setTimeout(() => { //Makes it look nicer if a bit of delay
+            this.submitting = false;
+            this.editing = false;
+            this.submitError = false;
+            this.isUploadingNewImage = false; //Because the new image is now the "original"
+            this.petData!.imageURL = this.inEditImageURL;
+            
+            for (const pair of editSubmit.entries()) {
+              switch(pair[0]) {
+                case "name":
+                case "species":
+                case "breed":
+                case "colour":
+                  this.petData!.petDetails[pair[0]] = pair[1].toString().trim()
+                  break;
+              }
+            }
+            
+          }, 300)
+        } else {
+          this.submitError = true;
+          this.submitting = false;
+          alert('Failed to update pet information.');
         }
-        );
+      } catch(e) {
+        this.submitError = true;
+        this.submitting = false;
+        console.error('Error updating pet information:', e);
+        alert('An error occurred while updating pet information.');
+      }
     },
 
-    handleNameChange(event: any) {
-      this.petName = event.target.value;
+    triggerImageUpload() {
+      this.isUploadingNewImage = true;
+
+      window.addEventListener('focus', () => {
+        this.isUploadingNewImage = false
+      }, { once: true });
+
+      (this.$refs.imgUploader as HTMLElement)?.click();
     },
 
-    handleSpeciesChange(event: any) {
-      this.petSpecies = event.target.value;
-    },
-    handleBreedChange(event: any) {
-      this.petBreed = event.target.value;
-    },
-    handleColourChange(event: any) {
-      this.petColour = event.target.value;
+    handleImageChange(event: Event) {
+      if ((event.target as HTMLInputElement)?.files && (event.target as HTMLInputElement).files!.length > 0) {
+        this.uploadedImageData = (event.target as HTMLInputElement).files![0];
+        this.inEditImageURL = URL.createObjectURL(this.uploadedImageData);
+      }
     },
 
 
     async setLost(newLostStatus: boolean) {
-      if (newLostStatus && this.isMissing) return;
+      if (newLostStatus && this.petData!.isMissing) return;
 
       const lostRes = await $fetch(`/api/pet/${this.$route.params.petID}/setLost`, {
         method: "POST",
@@ -292,46 +353,13 @@ export default {
       })
       if ((lostRes as any).status == 200) {
         console.log("updated")
-        this.isMissing = newLostStatus
+        this.petData!.isMissing = newLostStatus
 
         // FIXME temporary, because chat enrollment isn't updated here (yet)
         if (newLostStatus == true) location.reload();
       }
     },
-
-    async fetchPetData() {
-      try {
-        const apiData = await $fetch<PetModel>(`/api/pet/${this.$route.params.petID}`);
-        if (apiData) {
-          this.petName = apiData.petDetails.name;
-          this.petSpecies = apiData.petDetails.species;
-          const breed = apiData.petDetails.breed;
-          if (breed != undefined) {
-            this.petBreed = breed;
-          }
-          else {
-            this.petBreed = "N/A";
-          }
-          this.petColour = apiData.petDetails.colour;
-  
-          this.isMissing = apiData.isMissing;
-  
-          return true;
-        }
-      } catch(e) {}
-
-      return false;
-    },
-  },
-  async mounted() {
-    if (await this.fetchPetData()) {
-      this.hasData = true;
-    }
-
-    this.loaded=true;
   }
 };
 
 </script>
-
-<style></style>

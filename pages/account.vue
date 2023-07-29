@@ -53,7 +53,7 @@
                                     v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
                                     <VCard>
                                         <VCardTitle class="text-center">{{ pet.petDetails.name }}</VCardTitle>
-                                        <VImg src="/images/paw.jpg" cover />
+                                        <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
                                         <div class="d-flex justify-end mb-3 mt-3">
                                             <VBtn class="mr-3" color="error" variant="elevated"
                                                 @click="showConfirmationDialog = true">
@@ -71,14 +71,11 @@
                                         <!-- Confirmation Dialog -->
                                         <v-dialog v-model="showConfirmationDialog" max-width="500">
                                             <v-card>
-                                                <v-card-title
-                                                class="text-center font-weight-bold"
-                                                >Delete Confirmation</v-card-title>
+                                                <v-card-title class="text-center font-weight-bold">Delete
+                                                    Confirmation</v-card-title>
                                                 <v-card-text>Are you sure you want to delete {{ pet.petDetails.name
                                                 }}?</v-card-text>
-                                                <v-card-actions
-                                                class="d-flex justify-end mb-3 mt-3"
-                                                >
+                                                <v-card-actions class="d-flex justify-end mb-3 mt-3">
                                                     <VBtn color="red" @click="showConfirmationDialog = false">Cancel
                                                     </VBtn>
                                                     <VBtn color="green" @click="deletePet(pet)">Delete</VBtn>
@@ -86,8 +83,6 @@
                                             </v-card>
                                         </v-dialog>
                                     </VCard>
-
-
                                 </VCol>
                                 <VCol v-else>
                                     <VCard class="text-center" color="green-accent-1">
