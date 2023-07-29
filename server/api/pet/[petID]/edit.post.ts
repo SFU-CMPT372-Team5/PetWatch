@@ -82,22 +82,9 @@ export default defineEventHandler(async (event) => {
     );
 
     //Attempt to delete the old image if the new image doesn't share the same file extension 
-    //(prevents zombie files but ensures the image was replaced before deleting the old one)
-    if (fileUploadRes != undefined) {
-      const existingUrlSegments = existingImageUrl?.split(".");
-      //File ext is last dot
-
-      if (existingUrlSegments != undefined && existingUrlSegments?.length > 1) { //Proves at least 1 dot exists
-        const existingFileExt = existingUrlSegments[existingUrlSegments?.length - 1]
-
-        //Make sure not to delete the image if the new file ext is the same as the old one
-        //In this case, GCP will automatically delete the old file by replacing it with a file of the exact same name
-
-        if (existingFileExt != fileExt) {
-          //Delete the existing image
-          await getManagerInstance().delete(event.context.params!.petID, existingFileExt);
-        }        
-      }
+    //(prevents orphaning files, but ensures the image was replaced before deleting the old one)
+    if (fileUploadRes != undefined && existingImageUrl?.endsWith(fileExt) == false) {
+      await getManagerInstance().delete(event.context.params!.petID, existingImageUrl);
     }
 
     //Do this regardless

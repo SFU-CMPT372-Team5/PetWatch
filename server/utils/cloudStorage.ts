@@ -65,16 +65,24 @@ class CloudStorageManager {
         }
     }
 
-    async delete(petID: string, imageExt: string) {
-        const fileName = `${petID}.${imageExt}`
-        
-        try {
-            await this.Storage.bucket(BUCKET_NAME).file(fileName).delete();
+    async delete(petID: string, imageURL: string) {
 
-            return true;
-        } catch(e) {
-            return false;
+        const urlSegments = imageURL.split(".");
+        //File ext is last dot
+
+        if (urlSegments != undefined && urlSegments.length > 1) { //Proves at least 1 dot exists
+            const fileExt = urlSegments[urlSegments.length - 1]
+
+            const fileName = `${petID}.${fileExt}`
+            
+            try {
+                await this.Storage.bucket(BUCKET_NAME).file(fileName).delete();
+    
+                return true;
+            } catch(e) {}
         }
+        
+        return false;
     }
 }
 
