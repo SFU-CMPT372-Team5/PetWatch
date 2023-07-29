@@ -15,15 +15,12 @@
                         <VCard class="mb-1" width="100%">
                             <VRow style="width: 100%">
                             <VCol :cols="colWidths[0]" style="display: flex;">
-                                <VImg src="/images/tmp-demo-dog-img.jpg" lazy-src="/images/paw.jpg" cover >
-                                <template #placeholder>
-                                    <div class="d-flex align-center justify-center fill-height">
-                                    <v-progress-circular
-                                        color="grey-lighten-4"
-                                        indeterminate
-                                    ></v-progress-circular>
-                                    </div>
-                                </template>
+                                <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
+                                    <template #placeholder>
+                                        <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                        </div>
+                                    </template>
                                 </VImg>
                             </VCol>
                             <VCol :cols="colWidths[1]" style="justify-content: space-around; display: flex; flex-direction: column;">
@@ -77,7 +74,13 @@
                         <VRow class="fill-height" justify="center" align="center">
                             <VCol :cols="cardWidthCols">
                                 <VCard>
-                                    <VImg src="/images/paw.jpg" cover />
+                                    <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
+                                        <template #placeholder>
+                                            <div class="d-flex align-center justify-center fill-height">
+                                            <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                            </div>
+                                        </template>
+                                    </VImg>
                                     <VCardTitle>You met {{ petData?.petDetails.name }}!</VCardTitle>
                                     <!-- <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="112"></v-icon> -->
                                     
@@ -126,6 +129,8 @@
 </template>
 
 <script setup lang="ts">
+const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
+
 const route = useRoute();
 
 const limitedDataRes = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
@@ -151,6 +156,10 @@ watch(limitedDataRes.pending, async (dataVal) => {
         useRouter().push(`/pets/${route.params.petID}`);
         return;
     }
+})
+
+const petImageUrl = computed(() => {
+    return petData.value?.imageURL ?? PLACEHOLDER_IMAGE_URL
 })
 
 </script>

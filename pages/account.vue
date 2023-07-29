@@ -49,7 +49,7 @@
                                 <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
                                     v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
                                     <VCard @click="navigateTo('/pets/'+pet.Pet_UID)">
-                                        <VImg src="/images/paw.jpg" cover />
+                                        <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
                                         <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
                                     </VCard>
                                 </VCol>
