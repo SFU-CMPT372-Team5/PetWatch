@@ -3,51 +3,34 @@
         <VContainer fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
-                    <v-card v-if="!isEditing">
+                    <VCard >
                         <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Your Account</span>
-                            <v-spacer></v-spacer>
+                            <span v-if="!isEditing" class="text-h5">Your Account</span>
+                            <span v-else class="text-h5">Editing</span>
                         </v-card-title>
-                        <VContainer fluid>
-                            <v-spacer></v-spacer>
-                            <v-list rounded>
-                                <VListItem title="Name" :subtitle="(apiData as UserModel).userDetails.name"/>
-                                <VListItem title="Email" :subtitle="(apiData as UserModel).userDetails.email"/>
-                                <VListItem title="Address" :subtitle="(apiData as UserModel).userDetails.address"/>
-                                <VListItem title="Phone" :subtitle="(apiData as UserModel).userDetails.phone"/>
-                            </v-list>
 
-                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
-                        </VContainer>
-                    </v-card>
-                    <v-card v-else>
-                        <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Edit</span>
-                            <v-spacer></v-spacer>
-                        </v-card-title>
+                        <VCardText style="max-width: 50%;">
                             <VContainer fluid>
-                                <v-list rounded>
-                                <!-- Edit form -->
-                                <v-form @submit.prevent="submitForm" ref="form" rounded>
-                                    <v-text-field v-model="userDetails.name" :rules="nameRules" label="Name" required></v-text-field>
-                                    <v-text-field v-model="userDetails.address" label="Address"></v-text-field>
-                                    <!-- Email updated should update mongodb and auth0 -->
-                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules" disabled></v-text-field>
-                                    <v-text-field v-model="userDetails.phone" label="Phone" :rules="phoneRules"></v-text-field>
-                                    <v-btn type="submit" block color="blue-darken-2">Submit</v-btn>
-                                </v-form>
-                                </v-list>
-                                <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
-                            </VContainer>                        
-                    </v-card>
+                                <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form"/>
+                            </VContainer>
+                        </VCardText>
+                        
+                        <VCardActions v-if="!isEditing">
+                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
+                        </VCardActions>
+                        <VCardActions v-else>
+                            <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
+                            <v-btn @click="submitForm()" color="success">Submit</v-btn>
+                        </VCardActions>
+                    </VCard>
                     <VCard class="mt-3">
                         <VCardText>
                             <span class="text-h5">Your Pets</span>
                         </VCardText>
                         <VContainer fluid>
                             <VRow justify="center">
-                                <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
-                                    v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
+                                <VCol v-if="(petApiData?.length ?? 0) > 0"
+                                    v-for="pet in petApiData" :cols="chatCardCols">
                                     <VCard @click="navigateTo('/pets/'+pet.Pet_UID)">
                                         <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
                                         <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
@@ -75,48 +58,27 @@
 <script lang="ts" setup>
 import type UserModel from 'types/models/user';
 import type PetModel from "types/models/pet";
+import ContactDetails from '~/components/petProfile/ContactDetails.vue';
 
 definePageMeta({
     middleware: "auth"
 })
 
-const {data: apiData } = await useFetch("/api/account/info");
-const {data: petApiData} = await useFetch("/api/account/pets");
+//What's left
+// - API retrieval and updating of values after account changes
+// - Submit to account update with error handling
+
+const {data: apiData } = await useFetch<UserModel>("/api/account/info");
+const {data: petApiData} = await useFetch<PetModel[]>("/api/account/pets");
 </script>
 
 <script lang="ts">
 export default {
+    components: {ContactDetails},
     data() {
         return {
             isEditing: false,
-            userDetails: {
-                name: "",
-                address: "",
-                email: "",
-                phone: "",
-            },
-            nameRules: [
-                (value: String) => {
-                    if (value) return true
-
-                    return 'You must enter a name.'
-                },
-            ],
-            emailRules: [
-                (value: string) => {
-                    //https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
-                    if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) return true
-
-                    return 'Must be a valid e-mail.'
-                }
-            ],
-            phoneRules: [
-                (value: string) => {
-                    if (!value || (value?.length > 9 && /[0-9-]+/.test(value))) return true
-
-                    return 'Phone number needs to be at least 9 digits.'
-                },
-            ]
+            
         }
     },
     computed: {
@@ -144,15 +106,23 @@ export default {
         },
 
         async submitForm() {
-            const { valid } = await (this.$refs?.form as any).validate()
+            const valid = await (this.$refs?.form as typeof ContactDetails).validate()
+            const newValues = (this.$refs.form as typeof ContactDetails).curValues;
+
+            
             if (valid) {
-                await $fetch("/api/account/update", {
-                    method: 'PUT',
-                    body: {
-                        userDetails: this.userDetails
-                    }
-                })
-                this.$router.go(0)
+                this.userDetails = newValues;
+
+                try {
+                    await $fetch("/api/account/update", {
+                        method: 'PUT',
+                        body: {
+                            userDetails: this.userDetails
+                        }
+                    })
+                } catch(e) {
+
+                }
             }
         },
     },
