@@ -9,9 +9,22 @@ export default defineEventHandler(async (event) => {
     return { status: 401, body: { error: "Unauthorized" } };
   }
 
-  if (event.context.params) {
+  if (event.context.params && event.context.params.petID) {
     const id = event.context.params.petID;
+
     try {
+      // Check if the owner of the pet matches the logged-in user
+      const existingPet = await pet.findOne({
+        Pet_UID: id,
+        petOwnerID: token.sub,
+      });
+
+      if (existingPet == undefined) {
+        setResponseStatus(event, 404);
+        return { status: 401, message: "Pet not found/no access rights" };
+      }
+
+      // Delete Pet
       const deletedPet = await pet.findOneAndDelete({ Pet_UID: id });
       if (deletedPet) {
         return { status: 200, message: "Pet deleted successfully" };
