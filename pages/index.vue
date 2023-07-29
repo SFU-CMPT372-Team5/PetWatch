@@ -166,6 +166,7 @@
                         required></v-textarea>
                     <v-btn color="pink-darken-1" class="mb-6" dark
                         style="font-family: 'Roboto', sans-serif; font-size: 20px; width: 100%; height: 2.5rem;"
+                        :disabled="!valid"
                         @click="submitQuestions()">
                         Submit
                     </v-btn>
