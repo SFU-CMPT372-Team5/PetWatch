@@ -10,8 +10,6 @@ export default defineEventHandler(async (event) => {
         return {status: 400, message: "Invalid body syntax"}
     }
 
-    if ()
-
     if (token?.sub != undefined) {
         try {
             await user.findOneAndUpdate({ User_UID: token?.sub }, { 
