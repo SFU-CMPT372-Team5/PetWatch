@@ -82,7 +82,7 @@
                             <VCardTitle>
                               <h3 class=text-center>Contact Details</h3>
                             </VCardTitle>
-                            <PetProfileContactDetails :data="userData"/>
+                            <PetProfileContactDetails :data="userData?.userDetails"/>
                           </VCard>
                         </VCol>
                       </VRow>

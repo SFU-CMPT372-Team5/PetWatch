@@ -40,7 +40,7 @@
                                         <VCard height="100%">
                                             <VCardTitle><h3 class=text-center>Pet Details</h3></VCardTitle>
                                             <VCardText>
-                                                <PetDetails :data="(petData as PetModel)"/>
+                                                <PetDetails :data="(petData as PetModel).petDetails"/>
                                             </VCardText>
                                         </VCard>
                                         </VCol>
@@ -48,7 +48,7 @@
                                         <VCard height="100%">
                                             <VCardTitle><h3 class=text-center>Owner Contact Details</h3></VCardTitle>
                                             <VCardText>
-                                                <ContactDetails :data="(contactData)"/>
+                                                <ContactDetails :data="contactData"/>
                                             </VCardText>
                                         </VCard>
                                         </VCol>
