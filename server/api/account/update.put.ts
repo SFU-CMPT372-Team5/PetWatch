@@ -10,9 +10,17 @@ export default defineEventHandler(async (event) => {
         return {status: 400, message: "Invalid body syntax"}
     }
 
+    if ()
+
     if (token?.sub != undefined) {
         try {
-            await user.findOneAndUpdate({ User_UID: token?.sub }, { userDetails: body.userDetails })
+            await user.findOneAndUpdate({ User_UID: token?.sub }, { 
+                "userDetails.name": body.userDetails.name,
+                //Email is not allowed to be updated
+                "userDetails.address": body.userDetails.address,
+                "userDetails.phone": body.userDetails.phone 
+            });
+            
             return {message: "Account updated"}
         } catch (e) {
             setResponseStatus(event, 500);
