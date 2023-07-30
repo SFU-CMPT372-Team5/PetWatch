@@ -2,7 +2,7 @@
 
 <template>
   <v-app-bar scroll-behavior="hide" app color="indigo-lighten-1" dark>
-    <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/')">
+    <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/account')">
       <VIcon>mdi-arrow-left</VIcon>
     </v-app-bar-nav-icon>
     <v-toolbar-title>
