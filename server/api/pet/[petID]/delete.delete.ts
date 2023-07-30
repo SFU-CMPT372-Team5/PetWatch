@@ -24,19 +24,19 @@ export default defineEventHandler(async (event) => {
         return { status: 401, message: "Pet not found/no access rights" };
       }
 
-      // Secondly, try to delete pet image
+      // Secondly, if an image has been uploaded, delete the image
       const petImageUrl = existingPet.imageURL;
-      let imageDeleted = false;
+      if (petImageUrl != undefined) {
+        let imageDeleted = false;
 
-      if(petImageUrl != undefined){
         imageDeleted = await getManagerInstance().delete(id, petImageUrl);
+
+        if (imageDeleted == false) {
+          return { status: 404, message: "Pet image not found" };
+        }
       }
 
-      if(imageDeleted == false) {
-        return { status: 404, message: "Pet image not found" };
-      }
-      
-      // Lastly, try to delete the pet
+      // Lastly, delete the pet
       const deletedPet = await pet.findOneAndDelete({ Pet_UID: id });
 
       if (deletedPet) {
