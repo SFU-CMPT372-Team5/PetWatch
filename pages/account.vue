@@ -1,85 +1,90 @@
 <template>
     <VSheet rounded color="blue-accent-1" class="fill-height">
-        <VContainer fluid>
-            <v-row justify="center">
-                <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
-                    <VCard >
-                        <v-card-title class="bg-grey-lighten-2">
-                            <span v-if="!isEditing" class="text-h5">Your Account</span>
-                            <span v-else class="text-h5">Editing</span>
-                        </v-card-title>
-
-                        <VCardText style="max-width: 50%;">
+        <VFadeTransition group leave-absolute>
+            <VContainer v-if="accountPending" fluid class="fill-height">
+                <VRow justify="center" align="center" >
+                    <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
+                </VRow>
+            </VContainer>
+            <VContainer fluid v-else >
+                <v-row justify="center">
+                    <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
+                        <VCard >
+                            <v-card-title class="bg-grey-lighten-2">
+                                <span v-if="!isEditing" class="text-h5">Your Account</span>
+                                <span v-else class="text-h5">Editing</span>
+                            </v-card-title>
+    
+                            <VCardText style="max-width: 50%;">
+                                <VContainer fluid>
+                                    <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form"/>
+                                </VContainer>
+                            </VCardText>
+                            
+                            <VCardActions v-if="!isEditing">
+                                <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
+                            </VCardActions>
+                            <VCardActions v-else>
+                                <v-btn @click="isEditing = !isEditing" color="grey-darken-1">Cancel</v-btn>
+                                <v-btn @click="submitForm()" :color="accountUpdateError ? 'error' : 'success'" :loading="submittingAccountUpdate">Submit</v-btn>
+                            </VCardActions>
+                        </VCard>
+                        <VCard class="mt-3">
+                            <VCardText>
+                                <span class="text-h5">Your Pets</span>
+                            </VCardText>
                             <VContainer fluid>
-                                <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form"/>
+                                <VRow justify="center">
+                                    <VCol v-if="(petApiData?.length ?? 0) > 0"
+                                        v-for="pet in petApiData" :cols="chatCardCols">
+                                        <VCard @click="navigateTo('/pets/'+pet.Pet_UID)">
+                                            <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
+                                            <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
+                                        </VCard>
+                                    </VCol>
+                                    <VCol v-else>
+                                        <VCard class="text-center" color="green-accent-1">
+                                            <VCardTitle>You don't have any pets!</VCardTitle>
+                                            <VCardText>Add a pet to your profile by clicking below</VCardText>
+                                        </VCard>
+                                    </VCol>
+                                    <VCardActions style="justify-content: center;">
+                                        <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                            new Pet</VBtn>
+                                    </VCardActions>
+                                </VRow>
                             </VContainer>
-                        </VCardText>
-                        
-                        <VCardActions v-if="!isEditing">
-                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
-                        </VCardActions>
-                        <VCardActions v-else>
-                            <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
-                            <v-btn @click="submitForm()" color="success">Submit</v-btn>
-                        </VCardActions>
-                    </VCard>
-                    <VCard class="mt-3">
-                        <VCardText>
-                            <span class="text-h5">Your Pets</span>
-                        </VCardText>
-                        <VContainer fluid>
-                            <VRow justify="center">
-                                <VCol v-if="(petApiData?.length ?? 0) > 0"
-                                    v-for="pet in petApiData" :cols="chatCardCols">
-                                    <VCard @click="navigateTo('/pets/'+pet.Pet_UID)">
-                                        <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
-                                        <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
-                                    </VCard>
-                                </VCol>
-                                <VCol v-else>
-                                    <VCard class="text-center" color="green-accent-1">
-                                        <VCardTitle>You don't have any pets!</VCardTitle>
-                                        <VCardText>Add a pet to your profile by clicking below</VCardText>
-                                    </VCard>
-                                </VCol>
-                                <VCardActions style="justify-content: center;">
-                                    <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                        new Pet</VBtn>
-                                </VCardActions>
-                            </VRow>
-                        </VContainer>
-                    </VCard>
-                </v-col>
-            </v-row>
-        </VContainer>
+                        </VCard>
+                    </v-col>
+                </v-row>
+            </VContainer>
+        </VFadeTransition>
     </VSheet>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts">
 import type UserModel from 'types/models/user';
 import type PetModel from "types/models/pet";
 import ContactDetails from '~/components/petProfile/ContactDetails.vue';
 
-definePageMeta({
-    middleware: "auth"
-})
-
-//What's left
-// - API retrieval and updating of values after account changes
-// - Submit to account update with error handling
-
-const {data: apiData } = await useFetch<UserModel>("/api/account/info");
-const {data: petApiData} = await useFetch<PetModel[]>("/api/account/pets");
-</script>
-
-<script lang="ts">
 export default {
     components: {ContactDetails},
     data() {
         return {
             isEditing: false,
-            
+            submittingAccountUpdate: false,
+            accountUpdateError: false
         }
+    },
+    async setup() {
+        definePageMeta({
+            middleware: "auth"
+        })
+
+        const {data: apiData, pending: accountPending } = await useLazyFetch<UserModel>("/api/account/info");
+        const {data: petApiData, pending: petsPending} = await useLazyFetch<PetModel[]>("/api/account/pets");
+
+        return {apiData, petApiData, accountPending, petsPending};
     },
     computed: {
         chatCardCols() {
@@ -91,39 +96,45 @@ export default {
     },
 
     methods: {
-        //temp function to nicely display info labels from account information
-        formatLabel(string: String) {
-            string = string.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
-            string = string.charAt(0).toUpperCase() + string.slice(1)
-            string = string.replace("_", " ")
-            return string
-        },
         async fetchUserData() {
             const apiData = await $fetch("/api/account/info")
             if (apiData) {
-                this.userDetails = (apiData as UserModel).userDetails
+                this.apiData = (apiData as UserModel)
             }
         },
 
         async submitForm() {
+            this.submittingAccountUpdate = true;
             const valid = await (this.$refs?.form as typeof ContactDetails).validate()
             const newValues = (this.$refs.form as typeof ContactDetails).curValues;
 
             
-            if (valid) {
-                this.userDetails = newValues;
-
+            if (valid && newValues != undefined) {
+                this.apiData!.userDetails = newValues;
                 try {
                     await $fetch("/api/account/update", {
                         method: 'PUT',
                         body: {
-                            userDetails: this.userDetails
+                            userDetails: newValues
                         }
                     })
+                    //If here, no error
+                    this.accountUpdateError = false;
+                    
                 } catch(e) {
-
+                    alert("Failed to update account details, please try again");
+                    this.accountUpdateError = true;
+                    this.submittingAccountUpdate = false;
+                    //Want to early exit here to prevent changing back out of editing screen, 
+                    //so a little bit of code repeat required
+                    return;
                 }
             }
+
+            setTimeout(() => {
+                this.isEditing = false;
+                this.submittingAccountUpdate = false;
+            }, 400)
         },
     },
 
