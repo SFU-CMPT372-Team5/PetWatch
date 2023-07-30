@@ -1,5 +1,4 @@
 <template>
-    <!-- class="mt-3 mb-3 ml-6" -->
     <VImg  :src="imageUrl" :lazy-src="DEFAULT_IMAGE" cover>
         <template #placeholder>
             <div class="d-flex align-center justify-center fill-height">

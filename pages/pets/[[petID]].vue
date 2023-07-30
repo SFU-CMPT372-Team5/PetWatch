@@ -38,7 +38,7 @@
           <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <PetProfilePetImage ref="petImage" :editing="editing" :disabled="submitting" :petData="petData"/>
+                <PetProfilePetImage class="mt-3 mb-3 ml-3 rounded" ref="petImage" :editing="editing" :disabled="submitting" :petData="petData"/>
               </VCol>
               <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
                 <VCard class="mt-3 bg-pink-lighten-5">
