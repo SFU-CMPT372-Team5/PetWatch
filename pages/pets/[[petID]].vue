@@ -1,8 +1,20 @@
 <!-- Pet profile -->
 
 <template>
-  <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height"
-    fluid style="flex-direction: column; transition: background-color 0.3s linear;">
+  <v-app-bar scroll-behavior="hide" app color="indigo-lighten-1" dark>
+    <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/')">
+      <VIcon>mdi-arrow-left</VIcon>
+    </v-app-bar-nav-icon>
+    <v-toolbar-title>
+      <span class="hover-underline" @click="navigateTo('/')">PetWatch</span>
+      <VIcon>mdi-chevron-right</VIcon>
+      <span class="hover-underline" @click="navigateTo('/account')">My Account</span>
+      <VIcon>mdi-chevron-right</VIcon>
+      <span>{{ petData?.petDetails.name }}'s Profile</span>
+    </v-toolbar-title>
+  </v-app-bar>
+  <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-indigo-lighten-4'"
+    class="fill-height mt-15" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
     <VFadeTransition group leave-absolute>
       <template v-if="petPending">
         <VRow justify="center" align="center" class="fill-height">
@@ -23,10 +35,10 @@
           </VRow>
         </template>
         <template v-else>
-          <VCard class="mb-3 bg-pink-lighten-4" width="100%">
+          <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <VImg class="mt-3 mb-3 ml-3" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
+                <VImg class="mt-3 mb-3 ml-6" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height">
                       <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
@@ -40,7 +52,7 @@
                 </VImg>
               </VCol>
               <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
-                <VCard class="ma-3 bg-pink-lighten-5">
+                <VCard class="mt-3 bg-pink-lighten-5">
                   <v-card-text>
                     <VContainer fluid>
                       <VRow>
@@ -107,7 +119,7 @@
                     </VContainer>
                   </v-card-text>
                 </VCard>
-                <VCard class="ma-3 bg-pink-lighten-5">
+                <VCard class="mt-3 mb-3">
                   <VCardTitle>
                     <h2 class="text-center">QR Code</h2>
                   </VCardTitle>
@@ -126,14 +138,15 @@
               </VCol>
             </VRow>
           </VCard>
-          <VCard width="100%" class="bg-pink-lighten-4">
+          <VCard width="100%">
             <VCardTitle>
               <h2 class="text-center">Find your Pet</h2>
             </VCardTitle>
             <VCardText>
               <VRow style="width: 100%">
                 <VCol v-if="!petData.isMissing">
-                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
+                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
+                    class="mb-10 bg-pink-lighten-5">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
                     <VCardActions style="justify-content: center;">
                       <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>

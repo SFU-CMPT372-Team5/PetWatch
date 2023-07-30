@@ -1,11 +1,22 @@
 <template>
-    <VSheet rounded color="blue-accent-1" class="fill-height">
+    <v-app-bar scroll-behavior="hide" app color="indigo-lighten-1" dark>
+        <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/')">
+            <VIcon>mdi-arrow-left</VIcon>
+        </v-app-bar-nav-icon>
+        <v-toolbar-title>
+            <span class="hover-underline" @click="navigateTo('/')">PetWatch</span>
+            <VIcon>mdi-chevron-right</VIcon>
+            <span>My Account</span>
+        </v-toolbar-title>
+    </v-app-bar>
+
+    <VSheet rounded color="indigo-lighten-3" class="fill-height mt-15">
         <VContainer fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
                     <v-card v-if="!isEditing">
                         <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Your Account</span>
+                            <span class="text-h5">Account Information</span>
                             <v-spacer></v-spacer>
                         </v-card-title>
                         <VContainer fluid>
@@ -37,7 +48,7 @@
                                         disabled></v-text-field>
                                     <v-text-field v-model="userDetails.phone" label="Phone"
                                         :rules="phoneRules"></v-text-field>
-                                    <v-btn type="submit" block color="blue-darken-2">Submit</v-btn>
+                                    <v-btn type="submit" block color="blue-darken-2">Save</v-btn>
                                 </v-form>
                             </v-list>
                             <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
@@ -46,18 +57,18 @@
                     <VCard class="mt-3">
                         <VRow class="mt-3">
                             <VCardText>
-                            <span class="text-h5 ml-3">Your Pets</span>
-                        </VCardText>
-                        <VCardActions class="mr-6" style="justify-content: end">
-                            <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                new Pet</VBtn>
-                        </VCardActions>
+                                <span class="text-h5 ml-3">Your Pets</span>
+                            </VCardText>
+                            <VCardActions class="mr-6" style="justify-content: end">
+                                <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                    new Pet</VBtn>
+                            </VCardActions>
                         </VRow>
                         <VContainer fluid>
                             <VRow justify="center">
                                 <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
                                     v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
-                                    <VCard @click="navigateTo('/pets/' + pet.Pet_UID)">
+                                    <VCard class="bg-grey-darken-3" @click="navigateTo('/pets/' + pet.Pet_UID)">
                                         <VCardTitle class="text-center">{{ pet.petDetails.name }}</VCardTitle>
                                         <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
                                     </VCard>
@@ -93,6 +104,7 @@ const { data: petApiData } = await useFetch("/api/account/pets");
 export default {
     data() {
         return {
+            drawer: false,
             isEditing: false,
             userDetails: {
                 name: "",
@@ -173,3 +185,11 @@ export default {
     },
 };
 </script>
+
+<style>
+/* CSS to add underline on hover */
+.hover-underline:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>

@@ -1,8 +1,8 @@
 <template>
-  <v-container class="bg-pink-lighten-3 fill-height" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
+  <v-container class="bg-indigo-lighten-3 fill-height" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
     <v-card class="ma-5">
       <v-container style="width: 400px;">
-        <h2 class="text-center">Add Pet Form</h2>
+        <h2 class="text-center">Create New Pet</h2>
         <br>
         <v-form @submit.prevent="submitForm">
           <v-row>
@@ -26,7 +26,7 @@
           </v-row>
           <v-select v-model="lostStatus" :items="options" label="Is the pet Lost"></v-select>
           <v-btn color="error" class="mr-2" @click="navigateTo('/account')">Cancel</v-btn>
-          <v-btn :disabled="!validForm" type="submit" color="primary">Submit</v-btn>
+          <v-btn :disabled="!validForm" type="submit" color="green">Create</v-btn>
         </v-form>
       </v-container>
     </v-card>
