@@ -57,7 +57,8 @@
                                 variant="elevated" @click="startEdit()" v-if="!editing">
                               </VBtn>
                               <template v-else>
-                                <VBtn color="grey-darken-1" variant="elevated" @click="cancelEdit()" :disabled="submitting">
+                                <VBtn color="grey-darken-1" variant="elevated" @click="cancelEdit()"
+                                  :disabled="submitting">
                                   Cancel</VBtn>
                                 <VBtn :color="submitError ? 'error' : 'success'" variant="elevated" @click="submitEdit()"
                                   :loading="submitting">Save Changes</VBtn>
@@ -82,15 +83,23 @@
                         </div>
                         <!-- Confirmation Dialog -->
                         <v-dialog v-model="showConfirmationDialog" max-width="500">
-                          <v-card>
-                            <v-card-title class="text-center font-weight-bold">Delete
-                              Confirmation</v-card-title>
-                            <v-card-text>Are you sure you want to delete {{ petData.petDetails.name
+                          <v-card v-if="!petData.isMissing">
+                            <v-card-title class="text-center font-weight-bold">CONFIRMATION</v-card-title>
+                            <v-card-text class="text-h6">Are you sure you want to delete {{ petData.petDetails.name
                             }}?</v-card-text>
                             <v-card-actions class="d-flex justify-end mb-3 mt-3">
                               <VBtn variant="elevated" color="grey" @click="showConfirmationDialog = false">Cancel
                               </VBtn>
                               <VBtn variant="elevated" color="red" @click="deletePet(petData)">Delete</VBtn>
+                            </v-card-actions>
+                          </v-card>
+                          <v-card v-if="petData.isMissing">
+                            <v-card-title class="text-center font-weight-bold">WARNING</v-card-title>
+                            <v-card-text class="text-h6">Uh-Oh... You cannot delete a lost pet. Please mark your pet
+                              as found and try again.</v-card-text>
+                            <v-card-actions class="d-flex justify-end mb-3 mt-3">
+                              <VBtn variant="elevated" color="green" @click="showConfirmationDialog = false">OK
+                              </VBtn>
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
