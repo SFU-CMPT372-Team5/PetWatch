@@ -13,27 +13,22 @@ export default defineEventHandler(async (event) => {
     const id = event.context.params.petID;
 
     try {
-      // Firstly, check if the owner of the pet matches the logged-in user
+      // Firstly, check if the owner of the pet matches the logged-in user and if pet is not missing
       const existingPet = await pet.findOne({
         Pet_UID: id,
         petOwnerID: token.sub,
+        isMissing: false,
       });
 
       if (existingPet == undefined) {
         setResponseStatus(event, 404);
-        return { status: 401, message: "Pet not found/no access rights" };
+        return { status: 401, message: "Pet Not Found/No Access Rights/Cannot Delete Becuase Pet Is Marked Lost" };
       }
 
       // Secondly, if an image has been uploaded, delete the image
       const petImageUrl = existingPet.imageURL;
       if (petImageUrl != undefined) {
-        let imageDeleted = false;
-
-        imageDeleted = await getManagerInstance().delete(id, petImageUrl);
-
-        if (imageDeleted == false) {
-          return { status: 404, message: "Pet image not found" };
-        }
+        await getManagerInstance().delete(id, petImageUrl);
       }
 
       // Lastly, delete the pet
