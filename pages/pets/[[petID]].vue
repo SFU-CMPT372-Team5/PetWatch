@@ -1,8 +1,20 @@
 <!-- Pet profile -->
 
 <template>
-  <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-blue-accent-1'" class="fill-height" fluid
-    style="flex-direction: column; transition: background-color 0.3s linear;">
+  <v-app-bar scroll-behavior="hide" app color="indigo-lighten-1" dark>
+    <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/account')">
+      <VIcon>mdi-arrow-left</VIcon>
+    </v-app-bar-nav-icon>
+    <v-toolbar-title>
+      <span class="hover-underline" @click="navigateTo('/')">PetWatch</span>
+      <VIcon>mdi-chevron-right</VIcon>
+      <span class="hover-underline" @click="navigateTo('/account')">My Account</span>
+      <VIcon>mdi-chevron-right</VIcon>
+      <span>{{ petData?.petDetails.name }}'s Profile</span>
+    </v-toolbar-title>
+  </v-app-bar>
+  <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-indigo-lighten-4'"
+    class="fill-height mt-15" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
     <VFadeTransition group leave-absolute>
       <template v-if="petPending">
         <VRow justify="center" align="center" class="fill-height">
@@ -23,38 +35,24 @@
           </VRow>
         </template>
         <template v-else>
-          <VCard class="mb-1" width="100%">
+          <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
             <VRow style="width: 100%">
               <VCol :cols="cols[1]" style="display: flex;">
-                <VImg :src="imageUrl" :lazy-src="placeholderImgURL" cover >
+                <VImg class="mt-3 mb-3 ml-6" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height">
                       <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
                     </div>
                   </template>
                   <VFadeTransition>
-                    <VBtn 
-                      location="center" 
-                      prepend-icon="mdi-upload" 
-                      text="Upload Image" 
-                      color="green-darken-1"
-                      @click="triggerImageUpload"
-                      :loading="isUploadingNewImage"
-                      v-if="editing"
-                      :disabled="submitting"
-                    />
+                    <VBtn location="center" prepend-icon="mdi-upload" text="Upload Image" color="green-darken-1"
+                      @click="triggerImageUpload" :loading="isUploadingNewImage" v-if="editing" :disabled="submitting" />
                   </VFadeTransition>
-                  <input 
-                    ref="imgUploader"
-                    class="d-none"
-                    type="file"
-                    @change="handleImageChange"
-                    accept="image/*"
-                    />
+                  <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" accept="image/*" />
                 </VImg>
               </VCol>
               <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
-                <v-card>
+                <VCard class="mt-3 bg-pink-lighten-5">
                   <v-card-text>
                     <VContainer fluid>
                       <VRow>
@@ -64,15 +62,18 @@
                               <h3 class=text-center>Pet Details</h3>
                             </VCardTitle>
 
-                            <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails"/>
+                            <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails" />
 
                             <VCardActions style="justify-content: right;">
-                              <VBtn color="pink-accent-1" variant="elevated" @click="startEdit()" v-if="!editing">
-                                <VIcon>mdi-pencil</VIcon>
+                              <VBtn color="indigo-lighten-1" prepend-icon="mdi-pencil" text="Edit Details"
+                                variant="elevated" @click="startEdit()" v-if="!editing">
                               </VBtn>
                               <template v-else>
-                                <VBtn color="grey-darken-1" variant="text" @click="cancelEdit()" :disabled="submitting">Cancel</VBtn>
-                                <VBtn :color="submitError ? 'error': 'success'" variant="text" @click="submitEdit()" :loading="submitting">Save Changes</VBtn>
+                                <VBtn color="grey-darken-1" variant="elevated" @click="cancelEdit()"
+                                  :disabled="submitting">
+                                  Cancel</VBtn>
+                                <VBtn :color="submitError ? 'error' : 'success'" variant="elevated" @click="submitEdit()"
+                                  :loading="submitting">Save Changes</VBtn>
                               </template>
                             </VCardActions>
                           </VCard>
@@ -86,10 +87,39 @@
                           </VCard>
                         </VCol>
                       </VRow>
+                      <VRow style="justify-content: right;">
+                        <div class="mr-3 mt-3">
+                          <VBtn v-if="!editing" color="error" prepend-icon="mdi-delete" text="Delete Pet"
+                            variant="elevated" @click="showConfirmationDialog = true">
+                          </VBtn>
+                        </div>
+                        <!-- Confirmation Dialog -->
+                        <v-dialog v-model="showConfirmationDialog" max-width="500">
+                          <v-card v-if="!petData.isMissing">
+                            <v-card-title class="text-center font-weight-bold">CONFIRMATION</v-card-title>
+                            <v-card-text class="text-h6">Are you sure you want to delete {{ petData.petDetails.name
+                            }}?</v-card-text>
+                            <v-card-actions class="d-flex justify-end mb-3 mt-3">
+                              <VBtn variant="elevated" color="grey" @click="showConfirmationDialog = false">Cancel
+                              </VBtn>
+                              <VBtn variant="elevated" color="red" @click="deletePet(petData)">Delete</VBtn>
+                            </v-card-actions>
+                          </v-card>
+                          <v-card v-if="petData.isMissing">
+                            <v-card-title class="text-center font-weight-bold">WARNING</v-card-title>
+                            <v-card-text class="text-h6">Uh-Oh... You cannot delete a lost pet. Please mark your pet
+                              as found and try again.</v-card-text>
+                            <v-card-actions class="d-flex justify-end mb-3 mt-3">
+                              <VBtn variant="elevated" color="green" @click="showConfirmationDialog = false">OK
+                              </VBtn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </VRow>
                     </VContainer>
                   </v-card-text>
-                </v-card>
-                <VCard>
+                </VCard>
+                <VCard class="mt-3 mb-3">
                   <VCardTitle>
                     <h2 class="text-center">QR Code</h2>
                   </VCardTitle>
@@ -115,7 +145,8 @@
             <VCardText>
               <VRow style="width: 100%">
                 <VCol v-if="!petData.isMissing">
-                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center" class="mb-10">
+                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
+                    class="mb-10 bg-pink-lighten-5">
                     <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
                     <VCardActions style="justify-content: center;">
                       <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>
@@ -127,7 +158,7 @@
                   <VContainer>
                     <VRow justify="center">
                       <VCol :cols="chatCardCols" v-for="chat in chatData">
-                        <ChatCard :chatData="chat" :petID="(chat.petID as string)"/>
+                        <ChatCard :chatData="chat" :petID="(chat.petID as string)" />
                       </VCol>
                     </VRow>
                     <VRow justify="center">
@@ -189,13 +220,14 @@ export default {
   data() {
     return {
       editing: false,
+      showConfirmationDialog: false,
 
       submitting: false, //Loading spinner for save changes
       submitError: false,
-      
+
       isUploadingNewImage: false, //Loading spinner for uploading a file
-      uploadedImageData: undefined as File|undefined,
-      inEditImageURL: undefined as undefined|string,
+      uploadedImageData: undefined as File | undefined,
+      inEditImageURL: undefined as undefined | string,
     }
   },
   components: { QrcodeVue, ChatCard, PetDetails },
@@ -206,34 +238,34 @@ export default {
 
     const route = useRoute();
 
-    let userData = ref(undefined as UserModel|undefined);
-    let petData = ref(undefined as PetModel|undefined);
-    let chatData = ref(undefined as ChatModel[]|undefined);
+    let userData = ref(undefined as UserModel | undefined);
+    let petData = ref(undefined as PetModel | undefined);
+    let chatData = ref(undefined as ChatModel[] | undefined);
 
     let userPending = ref(true);
     let petPending = ref(true);
     let chatPending = ref(true);
     $fetch<UserModel>(`/api/account/info`)
-    .then((userRes) => {
-      userData.value = userRes;
-    })
-    .finally(() => userPending.value = false);
-    
+      .then((userRes) => {
+        userData.value = userRes;
+      })
+      .finally(() => userPending.value = false);
+
     $fetch<PetModel>(`/api/pet/${route.params.petID}`)
-    .then((petRes) => {
-      petData.value = petRes;
+      .then((petRes) => {
+        petData.value = petRes;
 
-      if (petRes.isMissing) {
-        $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
-        .then((chatRes) => {
-          chatData.value = chatRes;
-        })
-        .finally(() => chatPending.value = false);
-      }
-    })
-    .finally(() => petPending.value = false);
+        if (petRes.isMissing) {
+          $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
+            .then((chatRes) => {
+              chatData.value = chatRes;
+            })
+            .finally(() => chatPending.value = false);
+        }
+      })
+      .finally(() => petPending.value = false);
 
-    return {userData, petData, chatData, userPending, petPending, chatPending};
+    return { userData, petData, chatData, userPending, petPending, chatPending };
   },
   methods: {
     downloadQr() {
@@ -298,9 +330,9 @@ export default {
             this.submitError = false;
             this.isUploadingNewImage = false; //Because the new image is now the "original"
             this.petData!.imageURL = this.inEditImageURL;
-            
+
             for (const pair of editSubmit.entries()) {
-              switch(pair[0]) {
+              switch (pair[0]) {
                 case "name":
                 case "species":
                 case "breed":
@@ -309,18 +341,39 @@ export default {
                   break;
               }
             }
-            
+
           }, 300)
         } else {
           this.submitError = true;
           this.submitting = false;
           alert('Failed to update pet information.');
         }
-      } catch(e) {
+      } catch (e) {
         this.submitError = true;
         this.submitting = false;
         console.error('Error updating pet information:', e);
         alert('An error occurred while updating pet information.');
+      }
+    },
+
+    async deletePet(pet: PetModel) {
+      this.showConfirmationDialog = false;
+      const id = pet.Pet_UID;
+      const name = pet.petDetails.name;
+
+      try {
+        const deleteRes = await $fetch(`/api/pet/${id}/delete`, {
+          method: "DELETE",
+        });
+
+        if (deleteRes.status === 200) {
+          navigateTo('/account')
+        } else {
+          alert(`Failed to delete ${name}.`);
+        }
+      } catch (error) {
+        console.error('Error deleting pet:', error);
+        alert(`An error occurred while deleting ${name}.`);
       }
     },
 
