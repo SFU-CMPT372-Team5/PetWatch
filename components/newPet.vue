@@ -1,5 +1,5 @@
 <template>
-    <VDialog :fullscreen="$vuetify.display.xs" v-model="dialog" :max-width="$vuetify.display.mdAndUp ? '75%': 'unset'">
+    <VDialog :fullscreen="$vuetify.display.xs" v-model="dialog" :max-width="$vuetify.display.mdAndUp ? '50%': 'unset'">
         <template #activator="{props}">
             <VBtn v-bind="props" variant="elevated" color="blue-darken-2">Add new pet</VBtn>
         </template>
