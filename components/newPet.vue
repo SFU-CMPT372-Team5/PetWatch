@@ -24,7 +24,7 @@
                         </v-col>
                     </v-row>
                     <br/>
-                    <p class="text-center"><VIcon>mdi-information-outline</VIcon>You will be able to upload a picture of your pet and mark it as lost after adding it</p><br/>
+                    <p class="text-center"><VIcon>mdi-information-outline</VIcon>You will be able to upload a picture and mark your pet as lost after adding it</p><br/>
                     <!-- <v-select v-model="lostStatus" :items="options" label="Is the pet Lost"></v-select> -->
                     <v-btn color="grey-darken-2" class="mr-2" @click="dialog=false">Cancel</v-btn>
                     <v-btn type="submit" :color="submitError ? 'error' : 'success'" :loading="submitting">Add</v-btn>
