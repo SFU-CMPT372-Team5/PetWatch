@@ -85,6 +85,7 @@ const {data: petApiData} = await useFetch("/api/account/pets");
 </script>
 
 <script lang="ts">
+import axios from 'axios';
 export default {
     data() {
         return {
@@ -95,6 +96,9 @@ export default {
                 email: "",
                 phone: "",
             },
+            subject: 'test',
+            message: 't',
+
             nameRules: [
                 (value: String) => {
                     if (value) return true
@@ -154,6 +158,7 @@ export default {
                 })
                 this.$router.go(0)
             }
+            
         },
     },
 
