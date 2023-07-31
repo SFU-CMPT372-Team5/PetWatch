@@ -17,11 +17,14 @@ export default interface PetModel extends LimitedPetModel {
     
     isMissing: boolean,
     missingDetails?: { //Potentially defined if `isMissing` is true
-        lastSeen?: { //Optional
-            location: string, //Address or map pin (coordinates)
-            time: number //Unix Timestamp, Date::getTime() in node
-        }
-    }
+        lastSeen?: [{ //Optional
+            location: {
+                lat: Number,
+                lng: Number
+            }, //Address or map pin (coordinates)
+            time: Number //Unix Timestamp, Date::getTime() in node
+        }]
+    },
 }
 
 export interface LimitedPetModel {
