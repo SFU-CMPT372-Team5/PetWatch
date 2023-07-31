@@ -15,7 +15,7 @@
         <!-- Loaded w/data-->
         <span v-if="petData != undefined"> {{petData.petDetails.name }}'s Profile</span>
         <!-- Loaded w/out data -->
-        <span v-else-if="!petPending"> Pet not Found</span>
+        <span v-else-if="!petPending"> Pet not found</span>
 
         <!-- Not loaded -->
         <span v-else><VProgressCircular indeterminate style="opacity: 0.3;"/></span>
