@@ -14,6 +14,8 @@ export default interface PetModel extends LimitedPetModel {
             }
         ]
     },
+
+    imageURL?: string
     
     isMissing: boolean,
     missingDetails?: { //Potentially defined if `isMissing` is true
@@ -33,5 +35,6 @@ export interface LimitedPetModel {
     petDetails: {
         name: string,
     },
-    isMissing: boolean
+    isMissing: boolean,
+    imageURL?: string
 }

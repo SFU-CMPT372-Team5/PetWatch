@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
         "_id": 1,
         "petDetails.name": 1,
         "isMissing": 1,
+        "imageURL": 1
     });
 
     if (petRes != null) {

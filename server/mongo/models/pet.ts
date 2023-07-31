@@ -23,6 +23,7 @@ const schema = new mongoose.Schema({
             }
         ]
     },
+    imageURL: String,
     
     isMissing: {type: Boolean, required: true, default: false},
     missingDetails: { //Potentially defined if `isMissing` is true
