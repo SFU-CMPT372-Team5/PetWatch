@@ -6,6 +6,7 @@
         "Millis",
         "Nuxt",
         "petwatch",
+        "ruleset",
         "vuetify"
     ]
 }

@@ -1,56 +1,63 @@
 <template>
-    <VSheet rounded color="blue-accent-1" class="fill-height">
-        <VContainer fluid>
+    <v-app-bar scroll-behavior="hide" app color="indigo-lighten-1" dark>
+        <v-app-bar-nav-icon variant="elevated" class="bg-pink-lighten-4" @click="navigateTo('/')">
+            <VIcon>mdi-arrow-left</VIcon>
+        </v-app-bar-nav-icon>
+        <v-toolbar-title>
+            <span class="hover-underline" @click="navigateTo('/')">PetWatch</span>
+            <VIcon>mdi-chevron-right</VIcon>
+            <span>My Account</span>
+        </v-toolbar-title>
+    </v-app-bar>
+
+    <VSheet rounded color="indigo-lighten-3" class="fill-height mt-15">
+        <VFadeTransition group leave-absolute>
+        <VContainer v-if="accountPending" fluid class="fill-height">
+            <VRow justify="center" align="center" >
+                <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
+            </VRow>
+        </VContainer>
+        <VContainer v-else fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
-                    <v-card v-if="!isEditing">
+                    <VCard >
                         <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Your Account</span>
-                            <v-spacer></v-spacer>
+                            <span v-if="!isEditing" class="text-h5">Your Account</span>
+                            <span v-else class="text-h5">Editing</span>
                         </v-card-title>
-                        <VContainer fluid>
-                            <v-spacer></v-spacer>
-                            <v-list rounded>
-                                <VListItem title="Name" :subtitle="(apiData as UserModel).userDetails.name"/>
-                                <VListItem title="Email" :subtitle="(apiData as UserModel).userDetails.email"/>
-                                <VListItem title="Address" :subtitle="(apiData as UserModel).userDetails.address"/>
-                                <VListItem title="Phone" :subtitle="(apiData as UserModel).userDetails.phone"/>
-                            </v-list>
 
-                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
-                        </VContainer>
-                    </v-card>
-                    <v-card v-else>
-                        <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Edit</span>
-                            <v-spacer></v-spacer>
-                        </v-card-title>
+                        <VCardText style="max-width: 50%;">
                             <VContainer fluid>
-                                <v-list rounded>
-                                <!-- Edit form -->
-                                <v-form @submit.prevent="submitForm" ref="form" rounded>
-                                    <v-text-field v-model="userDetails.name" :rules="nameRules" label="Name" required></v-text-field>
-                                    <v-text-field v-model="userDetails.address" label="Address"></v-text-field>
-                                    <!-- Email updated should update mongodb and auth0 -->
-                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules" disabled></v-text-field>
-                                    <v-text-field v-model="userDetails.phone" label="Phone" :rules="phoneRules"></v-text-field>
-                                    <v-btn type="submit" block color="blue-darken-2">Submit</v-btn>
-                                </v-form>
-                                </v-list>
-                                <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
-                            </VContainer>                        
-                    </v-card>
-                    <VCard class="mt-3">
-                        <VCardText>
-                            <span class="text-h5">Your Pets</span>
+                                <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form"/>
+                            </VContainer>
                         </VCardText>
+                        
+                        <VCardActions v-if="!isEditing">
+                            <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
+                        </VCardActions>
+                        <VCardActions v-else>
+                            <v-btn @click="isEditing = !isEditing" color="grey-darken-1">Cancel</v-btn>
+                            <v-btn @click="submitForm()" :color="accountUpdateError ? 'error' : 'success'" :loading="submittingAccountUpdate">Submit</v-btn>
+                        </VCardActions>
+                    </VCard>
+
+                    <VCard class="mt-3">
+                        <VRow class="mt-3">
+                            <VCardText>
+                                <span class="text-h5 ml-3">Your Pets</span>
+                            </VCardText>
+                            <VCardActions class="mr-6" style="justify-content: end">
+                                <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                    new Pet</VBtn>
+                            </VCardActions>
+                        </VRow>
                         <VContainer fluid>
                             <VRow justify="center">
                                 <VCol v-if="((petApiData as PetModel[])?.length ?? 0) > 0"
                                     v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
-                                    <VCard @click="navigateTo('/pets/'+pet.Pet_UID)">
+                                    <VCard class="bg-grey-darken-3" @click="navigateTo('/pets/' + pet.Pet_UID)">
+                                        <VCardTitle class="text-center">{{ pet.petDetails.name }}</VCardTitle>
                                         <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
-                                        <VCardTitle>{{ pet.petDetails.name }}</VCardTitle>
                                     </VCard>
                                 </VCol>
                                 <VCol v-else>
@@ -59,69 +66,46 @@
                                         <VCardText>Add a pet to your profile by clicking below</VCardText>
                                     </VCard>
                                 </VCol>
-                                <VCardActions style="justify-content: center;">
-                                    <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                        new Pet</VBtn>
-                                </VCardActions>
                             </VRow>
                         </VContainer>
                     </VCard>
                 </v-col>
             </v-row>
         </VContainer>
+    </VFadeTransition>
     </VSheet>
 </template>
 
-<script lang="ts" setup>
-import type UserModel from 'types/models/user';
-import type PetModel from "types/models/pet";
-
-definePageMeta({
-    middleware: "auth"
-})
-
-const {data: apiData } = await useFetch("/api/account/info");
-const {data: petApiData} = await useFetch("/api/account/pets");
-</script>
-
 <script lang="ts">
+import type UserModel from "types/models/user";
+import type PetModel from "types/models/pet";
+import ContactDetails from '~/components/petProfile/ContactDetails.vue';
+
 import axios from 'axios';
+
 export default {
+    components: {ContactDetails},
     data() {
         return {
+            drawer: false,
             isEditing: false,
-            userDetails: {
-                name: "",
-                address: "",
-                email: "",
-                phone: "",
-            },
+
             subject: 'test',
             message: 't',
 
-            nameRules: [
-                (value: String) => {
-                    if (value) return true
-
-                    return 'You must enter a name.'
-                },
-            ],
-            emailRules: [
-                (value: string) => {
-                    //https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
-                    if (/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)) return true
-
-                    return 'Must be a valid e-mail.'
-                }
-            ],
-            phoneRules: [
-                (value: string) => {
-                    if (!value || (value?.length > 9 && /[0-9-]+/.test(value))) return true
-
-                    return 'Phone number needs to be at least 9 digits.'
-                },
-            ]
+            submittingAccountUpdate: false,
+            accountUpdateError: false
         }
+    },
+    async setup() {
+        definePageMeta({
+            middleware: "auth"
+        })
+
+        const {data: apiData, pending: accountPending } = await useLazyFetch<UserModel>("/api/account/info");
+        const {data: petApiData, pending: petsPending} = await useLazyFetch<PetModel[]>("/api/account/pets");
+
+        return {apiData, petApiData, accountPending, petsPending};
     },
     computed: {
         chatCardCols() {
@@ -129,41 +113,62 @@ export default {
             if (this.$vuetify.display.md) return 4;
             if (this.$vuetify.display.sm) return 6;
             return 12;
-        }
+        },
     },
 
     methods: {
-        //temp function to nicely display info labels from account information
-        formatLabel(string: String) {
-            string = string.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
-            string = string.charAt(0).toUpperCase() + string.slice(1)
-            string = string.replace("_", " ")
-            return string
-        },
         async fetchUserData() {
-            const apiData = await $fetch("/api/account/info")
+            const apiData = await $fetch("/api/account/info");
             if (apiData) {
-                this.userDetails = (apiData as UserModel).userDetails
+                this.apiData = (apiData as UserModel)
             }
         },
 
         async submitForm() {
-            const { valid } = await (this.$refs?.form as any).validate()
-            if (valid) {
-                await $fetch("/api/account/update", {
-                    method: 'PUT',
-                    body: {
-                        userDetails: this.userDetails
-                    }
-                })
-                this.$router.go(0)
-            }
+            this.submittingAccountUpdate = true;
+            const valid = await (this.$refs?.form as typeof ContactDetails).validate()
+            const newValues = (this.$refs.form as typeof ContactDetails).curValues;
+
             
+            if (valid && newValues != undefined) {
+                this.apiData!.userDetails = newValues;
+                try {
+                    await $fetch("/api/account/update", {
+                        method: 'PUT',
+                        body: {
+                            userDetails: newValues
+                        }
+                    })
+                    //If here, no error
+                    this.accountUpdateError = false;
+                    
+                } catch(e) {
+                    alert("Failed to update account details, please try again");
+                    this.accountUpdateError = true;
+                    this.submittingAccountUpdate = false;
+                    //Want to early exit here to prevent changing back out of editing screen, 
+                    //so a little bit of code repeat required
+                    return;
+                }
+            }
+
+            setTimeout(() => {
+                this.isEditing = false;
+                this.submittingAccountUpdate = false;
+            }, 400)
         },
     },
 
     mounted() {
-        this.fetchUserData()
-    }
-}
+        this.fetchUserData();
+    },
+};
 </script>
+
+<style>
+/* CSS to add underline on hover */
+.hover-underline:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
