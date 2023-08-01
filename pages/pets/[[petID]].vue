@@ -10,7 +10,7 @@
       <VIcon>mdi-chevron-right</VIcon>
       <span class="hover-underline" @click="navigateTo('/account')">My Account</span>
       <VIcon>mdi-chevron-right</VIcon>
-      <span>{{ petData?.petDetails.name }}'s Profile</span>
+      <span>{{ petData?.petDetails?.name }}'s Profile</span>
     </v-toolbar-title>
   </v-app-bar>
   <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-indigo-lighten-4'"
@@ -29,7 +29,8 @@
             <VCol>
               <VCard class=text-center>
                 <VIcon size="112" color="error">mdi-close-circle-outline</VIcon>
-                <VCardTitle>That pet doesn't exist!</VCardTitle>
+                <VCardTitle v-if="$route.params.petID?.length > 0">That pet doesn't exist!</VCardTitle>
+                <VCardTitle v-else>That URL is invalid</VCardTitle>
               </VCard>
             </VCol>
           </VRow>
@@ -231,40 +232,34 @@ export default {
     }
   },
   components: { QrcodeVue, ChatCard, PetDetails },
-  setup() {
+  async setup() {
     definePageMeta({
       middleware: ["auth"]
     })
 
     const route = useRoute();
 
-    let userData = ref(undefined as UserModel | undefined);
-    let petData = ref(undefined as PetModel | undefined);
-    let chatData = ref(undefined as ChatModel[] | undefined);
+    const {data: userData, pending: userPending} = await useLazyFetch<UserModel>(`/api/account/info`);
 
-    let userPending = ref(true);
-    let petPending = ref(true);
-    let chatPending = ref(true);
-    $fetch<UserModel>(`/api/account/info`)
-      .then((userRes) => {
-        userData.value = userRes;
-      })
-      .finally(() => userPending.value = false);
+    
+    if (route.params.petID?.length > 0) {
+      //This if statement is needed because /api/pets//chats is not a valid url, which happens when petId is length 0
+      //Additionally, /api/pets doesnt return invalid pet data, it just returns the HTML 404 page
 
-    $fetch<PetModel>(`/api/pet/${route.params.petID}`)
-      .then((petRes) => {
-        petData.value = petRes;
+      var {data: petData, pending: petPending} = await useLazyFetch<PetModel>(`/api/pet/${route.params.petID}/`);
 
-        if (petRes.isMissing) {
-          $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
-            .then((chatRes) => {
-              chatData.value = chatRes;
-            })
-            .finally(() => chatPending.value = false);
-        }
-      })
-      .finally(() => petPending.value = false);
+      //While technically chats aren't needed unless the pet is lost, it is async so shouldn't impact load time
+      var {data: chatData, pending: chatPending} = await useLazyFetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
+    } else {
+      //Because we know an empty petID is not valid, we can just pre-populate those values
 
+      var petData = ref(null) as Ref<PetModel|null>//This as is here to make typescript happy
+      var petPending = ref(false);
+
+      var chatData = ref(null) as Ref<ChatModel[]|null>; 
+      var chatPending = ref(false);
+    }
+    
     return { userData, petData, chatData, userPending, petPending, chatPending };
   },
   methods: {
