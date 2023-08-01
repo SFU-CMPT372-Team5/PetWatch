@@ -158,6 +158,10 @@ watch(limitedDataRes.pending, async (dataVal) => {
     }
 })
 
+useHead({
+    title: `Found ${petData.value != undefined ? `${petData.value.petDetails.name}` : 'Found Pet'} | PetWatch`
+})
+
 const petImageUrl = computed(() => {
     return petData.value?.imageURL ?? PLACEHOLDER_IMAGE_URL
 })

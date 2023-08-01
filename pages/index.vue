@@ -181,6 +181,12 @@
 </template>
 
 
+<script setup lang="ts">
+useHead({
+    title: "PetWatch"
+})
+</script>
+
 <script lang="ts">
 import emailjs from '@emailjs/browser';
 
