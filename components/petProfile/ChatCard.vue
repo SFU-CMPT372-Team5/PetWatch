@@ -2,7 +2,7 @@
     <VCard>
         <VCardTitle>
             <!-- Proper things coming soon -->
-            Chat with: Finder
+            Chat with: {{chatData.strangerID}}
         </VCardTitle>
         <!-- <VCardText>Laura: This is a message</VCardText> -->
         <VCardActions style="justify-content: center;">
@@ -23,11 +23,16 @@ export default {
             type: Object as PropType<ChatModel>,
             required: true
         },
-        petID: String
+        petID: String,
+        strangerName:String
+        
     },
+    strangerName:'f',
+    
+
     methods: {
         openChat() {
-
+            
         }
     }
 }
