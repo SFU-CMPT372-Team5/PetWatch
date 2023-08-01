@@ -11,49 +11,36 @@
     </v-app-bar>
 
     <VSheet rounded color="indigo-lighten-3" class="fill-height mt-15">
-        <VContainer fluid>
+        <VFadeTransition group leave-absolute>
+        <VContainer v-if="accountPending" fluid class="fill-height">
+            <VRow justify="center" align="center" >
+                <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
+            </VRow>
+        </VContainer>
+        <VContainer v-else fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">
-                    <v-card v-if="!isEditing">
+                    <VCard >
                         <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Account Information</span>
-                            <v-spacer></v-spacer>
+                            <span v-if="!isEditing" class="text-h5">Your Account</span>
+                            <span v-else class="text-h5">Editing</span>
                         </v-card-title>
-                        <VContainer fluid>
-                            <v-spacer></v-spacer>
-                            <v-list rounded>
-                                <VListItem title="Name" :subtitle="(apiData as UserModel).userDetails.name" />
-                                <VListItem title="Email" :subtitle="(apiData as UserModel).userDetails.email" />
-                                <VListItem title="Address" :subtitle="(apiData as UserModel).userDetails.address" />
-                                <VListItem title="Phone" :subtitle="(apiData as UserModel).userDetails.phone" />
-                            </v-list>
 
+                        <VCardText style="max-width: 50%;">
+                            <VContainer fluid>
+                                <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form"/>
+                            </VContainer>
+                        </VCardText>
+                        
+                        <VCardActions v-if="!isEditing">
                             <v-btn @click="isEditing = !isEditing" color="blue-darken-2">Edit Profile</v-btn>
-                        </VContainer>
-                    </v-card>
-                    <v-card v-else>
-                        <v-card-title class="bg-grey-lighten-2">
-                            <span class="text-h5">Edit</span>
-                            <v-spacer></v-spacer>
-                        </v-card-title>
-                        <VContainer fluid>
-                            <v-list rounded>
-                                <!-- Edit form -->
-                                <v-form @submit.prevent="submitForm" ref="form" rounded>
-                                    <v-text-field v-model="userDetails.name" :rules="nameRules" label="Name"
-                                        required></v-text-field>
-                                    <v-text-field v-model="userDetails.address" label="Address"></v-text-field>
-                                    <!-- Email updated should update mongodb and auth0 -->
-                                    <v-text-field v-model="userDetails.email" label="Email" :rules="emailRules"
-                                        disabled></v-text-field>
-                                    <v-text-field v-model="userDetails.phone" label="Phone"
-                                        :rules="phoneRules"></v-text-field>
-                                    <v-btn type="submit" block color="blue-darken-2">Save</v-btn>
-                                </v-form>
-                            </v-list>
-                            <v-btn @click="isEditing = !isEditing" color="red-darken-2">Cancel</v-btn>
-                        </VContainer>
-                    </v-card>
+                        </VCardActions>
+                        <VCardActions v-else>
+                            <v-btn @click="isEditing = !isEditing" color="grey-darken-1">Cancel</v-btn>
+                            <v-btn @click="submitForm()" :color="accountUpdateError ? 'error' : 'success'" :loading="submittingAccountUpdate">Submit</v-btn>
+                        </VCardActions>
+                    </VCard>
+
                     <VCard class="mt-3">
                         <VRow class="mt-3">
                             <VCardText>
@@ -85,62 +72,34 @@
                 </v-col>
             </v-row>
         </VContainer>
+    </VFadeTransition>
     </VSheet>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts">
 import type UserModel from "types/models/user";
 import type PetModel from "types/models/pet";
+import ContactDetails from '~/components/petProfile/ContactDetails.vue';
 
-definePageMeta({
-    middleware: "auth",
-});
-
-const { data: apiData } = await useFetch("/api/account/info");
-const { data: petApiData } = await useFetch("/api/account/pets");
-</script>
-
-<script lang="ts">
 export default {
+    components: {ContactDetails},
     data() {
         return {
             drawer: false,
             isEditing: false,
-            userDetails: {
-                name: "",
-                address: "",
-                email: "",
-                phone: "",
-            },
-            nameRules: [
-                (value: String) => {
-                    if (value) return true;
+            submittingAccountUpdate: false,
+            accountUpdateError: false
+        }
+    },
+    async setup() {
+        definePageMeta({
+            middleware: "auth"
+        })
 
-                    return "You must enter a name.";
-                },
-            ],
-            emailRules: [
-                (value: string) => {
-                    //https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
-                    if (
-                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
-                            value
-                        )
-                    )
-                        return true;
+        const {data: apiData, pending: accountPending } = await useLazyFetch<UserModel>("/api/account/info");
+        const {data: petApiData, pending: petsPending} = await useLazyFetch<PetModel[]>("/api/account/pets");
 
-                    return "Must be a valid e-mail.";
-                },
-            ],
-            phoneRules: [
-                (value: string) => {
-                    if (!value || (value?.length > 9 && /[0-9-]+/.test(value)))
-                        return true;
-
-                    return "Phone number needs to be at least 9 digits.";
-                },
-            ],
-        };
+        return {apiData, petApiData, accountPending, petsPending};
     },
     computed: {
         chatCardCols() {
@@ -152,31 +111,45 @@ export default {
     },
 
     methods: {
-        //temp function to nicely display info labels from account information
-        formatLabel(string: String) {
-            string = string.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-            string = string.charAt(0).toUpperCase() + string.slice(1);
-            string = string.replace("_", " ");
-            return string;
-        },
         async fetchUserData() {
             const apiData = await $fetch("/api/account/info");
             if (apiData) {
-                this.userDetails = (apiData as UserModel).userDetails;
+                this.apiData = (apiData as UserModel)
             }
         },
 
         async submitForm() {
-            const { valid } = await (this.$refs?.form as any).validate();
-            if (valid) {
-                await $fetch("/api/account/update", {
-                    method: "PUT",
-                    body: {
-                        userDetails: this.userDetails,
-                    },
-                });
-                this.$router.go(0);
+            this.submittingAccountUpdate = true;
+            const valid = await (this.$refs?.form as typeof ContactDetails).validate()
+            const newValues = (this.$refs.form as typeof ContactDetails).curValues;
+
+            
+            if (valid && newValues != undefined) {
+                this.apiData!.userDetails = newValues;
+                try {
+                    await $fetch("/api/account/update", {
+                        method: 'PUT',
+                        body: {
+                            userDetails: newValues
+                        }
+                    })
+                    //If here, no error
+                    this.accountUpdateError = false;
+                    
+                } catch(e) {
+                    alert("Failed to update account details, please try again");
+                    this.accountUpdateError = true;
+                    this.submittingAccountUpdate = false;
+                    //Want to early exit here to prevent changing back out of editing screen, 
+                    //so a little bit of code repeat required
+                    return;
+                }
             }
+
+            setTimeout(() => {
+                this.isEditing = false;
+                this.submittingAccountUpdate = false;
+            }, 400)
         },
     },
 
