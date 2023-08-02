@@ -2,6 +2,7 @@ import { pet } from "../../../mongo/models";
 import { getToken } from "#auth";
 import {getManagerInstance} from "~/server/utils/cloudStorage"
 import PetModel from "../../../../types/models/pet";
+import {imageUploadMaxBytes} from "~/config.json"
 
 
 export default defineEventHandler(async (event) => {
@@ -69,6 +70,12 @@ export default defineEventHandler(async (event) => {
 
   let resultImgURL;
   if (imageEntry != undefined && imageEntry.type) {
+    //Let's impose a upper limit on a maximum file size
+    if (imageEntry.data.length > imageUploadMaxBytes) { //Set to 10mb
+      //Too big!
+      setResponseStatus(event, 413);
+      return {status: 413, message: "Image too big! Max size (bytes): " + imageUploadMaxBytes}
+    }
     
     //Is an image-type file
     const fileExt = imageEntry.filename?.split('.').pop();
