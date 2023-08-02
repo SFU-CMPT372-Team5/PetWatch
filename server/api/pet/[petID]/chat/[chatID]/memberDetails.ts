@@ -34,13 +34,12 @@ export default defineEventHandler(async event => {
         const owner = await user.findOne({User_UID: chatRes.ownerID});
         const stranger = await user.findOne({User_UID: chatRes.strangerID});
 
-        if (owner == undefined && stranger == undefined) throw Error(); //Cause that shouldn't happen
+        if (owner == undefined || stranger == undefined) throw Error(); //Cause that shouldn't happen
 
         return {
             ownerDetails: owner?.userDetails as UserDetails|undefined,
             strangerDetails: stranger?.userDetails as UserDetails|undefined
         };
-
     } catch(e) {}
 
     if (token?.sub == undefined) {

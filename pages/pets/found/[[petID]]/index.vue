@@ -177,5 +177,13 @@ export default {
             return this.contactData?.name ?? "The Pet's Owner"
         }
     },
+    mounted() {
+        //This is one place where users will potentially create an account and log in and then use their account details
+        //The system isn't set up to automatically create a database entry when a person creates an account rather the first time
+        //They click on the accounts page (and call get get account info api endpoint). 
+        
+        //As such this just calls that endpoint to ensure the user has a database entry
+        $fetch("/api/account/info");
+    }
 }
 </script>

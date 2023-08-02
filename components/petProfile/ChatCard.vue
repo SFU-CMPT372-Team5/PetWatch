@@ -16,7 +16,7 @@
     
             <!-- <VCardText>Laura: This is a message</VCardText> -->
             <VCardActions style="justify-content: center;">
-                <ChatLauncher :chatID="chatData.Chat_UID" :petID="petID" :strangerName="strangerDetails?.name"/>
+                <ChatLauncher :chatID="chatData.Chat_UID" :petID="petID" :strangerName="strangerName"/>
             </VCardActions>
         </template>
     </VCard>
@@ -41,7 +41,7 @@ export default {
         return {
             namePending: true,
             textPending: true,
-            strangerDetails: undefined as undefined|UserDetails,
+            strangerName: undefined as undefined|string,
             lastText: undefined as undefined|string
         }
     },
@@ -56,7 +56,7 @@ export default {
             } catch(e) {
                 this.lastText = "Open to see messages"
             }
-            this.textPending = false;
+            this.textPending = false; //Always do this incase the stranger details fail to arrive
         }
     },
     async mounted() {
@@ -65,10 +65,15 @@ export default {
             const chatData = await $fetch(`/api/pet/${this.petID}/chat/${this.chatData.Chat_UID}/memberDetails`);
 
             if ("strangerDetails" in chatData) {
-                this.strangerDetails = chatData.strangerDetails;
-                this.namePending = false;
+                this.strangerName = chatData.strangerDetails?.name ?? "Finder";
+            } else {
+                this.strangerName = "Finder";
             }
-        } catch(e) {}
+            this.namePending = false;
+        } catch(e) {
+            this.strangerName = "Finder";
+            this.namePending = false;
+        }
 
         try {
             const lastMessage = await $fetch(`/api/pet/${this.petID}/chat/${this.chatData.Chat_UID}/latestMessage`);
