@@ -4,9 +4,9 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "createPm2": "pm2 start npm --name 'PetWatch' -- run preview"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
