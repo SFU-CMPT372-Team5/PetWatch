@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
         return { status: 400, body: { error: "Bad Request" } };
     }
     try {
+        // Find a missing pet with the given ID and update its 'missingDetails.lastSeen' array with the new location and time.
         const locatedPet = await pet.findOneAndUpdate(
             { 
                 Pet_UID: pId,
@@ -31,6 +32,7 @@ export default defineEventHandler(async (event) => {
             },
             { new: true}
         )
+        // If the pet is found and its last seen details are updated, return 200 (OK) status and the updated pet details.
         if (locatedPet) {
             console.log("pet located!");
             setResponseStatus(event, 200);
@@ -41,6 +43,7 @@ export default defineEventHandler(async (event) => {
             return { status: 404, body: { error: "Pet not found" } };
         }
     } catch (error) {
+        // If there is an error while updating the pet, return 500 (Internal Server Error) status.
         console.error("Error updating pet:", error);
         setResponseStatus(event, 500);
         return { status: 500, body: { error: "Server error" } };
