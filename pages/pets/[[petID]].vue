@@ -454,6 +454,12 @@ export default {
         console.log("updated")
         this.petData!.isMissing = newLostStatus
 
+        if (!newLostStatus) {
+          $fetch(`/api/pet/${this.$route.params.petID}/deletePings`, {method: "PUT"})
+          .catch(e => {
+            console.error(e)
+          })
+        }
         // FIXME temporary, because chat enrollment isn't updated here (yet)
         if (newLostStatus == true) location.reload();
       }
