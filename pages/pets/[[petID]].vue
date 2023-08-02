@@ -207,8 +207,8 @@
                         </GMapMap>
                         <VBtn @click="selectingLocation = true" v-if="!selectingLocation" class="ma-2 pa-2">Set last seen</VBtn>
                         <div v-else class="d-flex mb-6">
-                          <VBtn @click="selectLocation" class="ma-2 pa-2" color="green-lighten-2">Done</VBtn>
-                          <VBtn @click="selectingLocation = false" class="ma-2 pa-2 me-auto" color="red-lighten-2">Cancel</VBtn>
+                          <VBtn @click="selectLocation" class="ma-2 pa-2" color="green-darken-2" :disabled="!draggedToLocation">Done</VBtn>
+                          <VBtn @click="{selectingLocation = false; draggedToLocation = null}" class="ma-2 pa-2 me-auto" color="red-darken-2">Cancel</VBtn>
                           <VBtn @click="removeLocation" class="ma-2 pa-2" color="red-darken-2">Remove last seen</VBtn>
                         </div>
 
@@ -291,6 +291,7 @@ export default {
       // markers: [] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[],
       openedMarkerKey: null as number | null,
       selectingLocation: false,
+      draggedToLocation: null as { lat: Number; lng: Number; } | null,
 
       showConfirmationDialog: false,
 
@@ -528,7 +529,7 @@ export default {
         lat: e.latLng.lat(),
         lng: e.latLng.lng()
     }
-      this.lastSeenByOwner = res
+      this.draggedToLocation = res
     },
 
     async removeLocation() {
@@ -543,10 +544,14 @@ export default {
                 alert("Failed to set location")
             })
       this.lastSeenByOwner = undefined
+      this.draggedToLocation = null
       this.selectingLocation = false
     },
 
     async selectLocation() {
+      if (this.draggedToLocation) {
+        this.lastSeenByOwner = this.draggedToLocation
+      }
       await $fetch(`/api/pet/${this.petData?.Pet_UID}/locationByOwner`, {
                 method: 'PUT',
                 body: {
