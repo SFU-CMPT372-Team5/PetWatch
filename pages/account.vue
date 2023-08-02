@@ -90,6 +90,9 @@ export default {
         }
     },
     async setup() {
+        useHead({
+            title: "My Account | PetWatch"
+        })
         definePageMeta({
             middleware: "auth"
         })

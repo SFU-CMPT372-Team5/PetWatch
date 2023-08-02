@@ -316,6 +316,10 @@ export default {
       })
       .finally(() => petPending.value = false);
 
+    useHead({
+      title: `${petData.value != undefined ? `${petData.value.petDetails.name}'s Pet Profile` : 'Pet Profile'} | PetWatch`
+    })
+
     return { userData, petData, chatData, userPending, petPending, chatPending, center, markers };
   },
   methods: {

@@ -135,6 +135,10 @@ watch(limitedDataRes.pending, async (dataVal) => {
         return;
     }
 })
+
+useHead({
+    title: `Found ${petData.value != undefined ? `${petData.value.petDetails.name}` : 'Found Pet'} | PetWatch`
+})
 </script>
 
 <script lang="ts">
