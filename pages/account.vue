@@ -12,11 +12,8 @@
 
     <VSheet rounded color="indigo-lighten-3" class="fill-height mt-15">
         <VFadeTransition group leave-absolute>
-        <VContainer v-if="accountPending" fluid class="fill-height">
-            <VRow justify="center" align="center" >
-                <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
-            </VRow>
-        </VContainer>
+            
+        <SharedPageLoading v-if="accountPending"/>
         <VContainer v-else fluid>
             <v-row justify="center">
                 <v-col :cols="$vuetify.display.smAndDown ? 11 : 10">

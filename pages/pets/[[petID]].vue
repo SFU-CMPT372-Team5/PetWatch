@@ -10,202 +10,212 @@
       <VIcon>mdi-chevron-right</VIcon>
       <span class="hover-underline" @click="navigateTo('/account')">My Account</span>
       <VIcon>mdi-chevron-right</VIcon>
-      <span>{{ petData?.petDetails.name }}'s Profile</span>
+
+      <VFadeTransition leave-absolute>
+        <!-- Loaded w/data-->
+        <span v-if="petData != undefined"> {{petData.petDetails.name }}'s Profile</span>
+        <!-- Loaded w/out data -->
+        <span v-else-if="!petPending"> Pet not found</span>
+
+        <!-- Not loaded -->
+        <span v-else><VProgressCircular indeterminate style="opacity: 0.3;"/></span>
+      </VFadeTransition>
     </v-toolbar-title>
   </v-app-bar>
+  
   <v-container :class="!petPending && petData == undefined ? 'bg-red-accent-1' : 'bg-indigo-lighten-4'"
     class="fill-height mt-15" fluid style="flex-direction: column; transition: background-color 0.3s linear;">
     <VFadeTransition group leave-absolute>
-      <template v-if="petPending">
+      <!-- Loading -->
+      <SharedPageLoading v-if="petPending"/>
+
+      <!-- Loaded w/out data -->
+      <template v-else-if="petData == undefined">
         <VRow justify="center" align="center" class="fill-height">
           <VCol>
-            <VProgressCircular indeterminate color="grey-lighten-4" size="large" />
+            <VCard class=text-center>
+              <VIcon size="112" color="error">mdi-close-circle-outline</VIcon>
+              <VCardTitle>That pet doesn't exist!</VCardTitle>
+              <VCardActions style="justify-content: center;"><VBtn @click="navigateTo('/account')" variant="elevated" color="blue-darken-2">Go to Account</VBtn></VCardActions>
+            </VCard>
           </VCol>
         </VRow>
       </template>
+
+
+      <!-- Loaded w/ data -->
       <template v-else>
-        <template v-if="petData == undefined">
-          <VRow justify="center" align="center" class="fill-height">
-            <VCol>
-              <VCard class=text-center>
-                <VIcon size="112" color="error">mdi-close-circle-outline</VIcon>
-                <VCardTitle>That pet doesn't exist!</VCardTitle>
+
+        <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
+          <VRow style="width: 100%">
+            <VCol :cols="cols[1]" style="display: flex;">
+              <VImg class="mt-3 mb-3 ml-6" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
+                <template #placeholder>
+                  <div class="d-flex align-center justify-center fill-height">
+                    <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                  </div>
+                </template>
+                <VFadeTransition>
+                  <VBtn location="center" prepend-icon="mdi-upload" text="Upload Image" color="green-darken-1"
+                    @click="triggerImageUpload" :loading="isUploadingNewImage" v-if="editing" :disabled="submitting" />
+                </VFadeTransition>
+                <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" accept="image/*" />
+              </VImg>
+            </VCol>
+            <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
+              <VCard class="mt-3 bg-pink-lighten-5">
+                <v-card-text>
+                  <VContainer fluid>
+                    <VRow>
+                      <VCol :cols="$vuetify.display.mdAndDown ? 12 : 6">
+                        <VCard height="100%">
+                          <VCardTitle>
+                            <h3 class=text-center>Pet Details</h3>
+                          </VCardTitle>
+  
+                          <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails" />
+  
+                          <VCardActions style="justify-content: right;">
+                            <VBtn color="indigo-lighten-1" prepend-icon="mdi-pencil" text="Edit Details"
+                              variant="elevated" @click="startEdit()" v-if="!editing">
+                            </VBtn>
+                            <template v-else>
+                              <VBtn color="grey-darken-1" variant="elevated" @click="cancelEdit()"
+                                :disabled="submitting">
+                                Cancel</VBtn>
+                              <VBtn :color="submitError ? 'error' : 'success'" variant="elevated" @click="submitEdit()"
+                                :loading="submitting">Save Changes</VBtn>
+                            </template>
+                          </VCardActions>
+                        </VCard>
+                      </VCol>
+                      <VCol>
+                        <VCard height="100%">
+                          <VCardTitle>
+                            <h3 class=text-center>Contact Details</h3>
+                          </VCardTitle>
+                          <PetProfileContactDetails :data="userData?.userDetails"/>
+                        </VCard>
+                      </VCol>
+                    </VRow>
+                    <VRow style="justify-content: right;">
+                      <div class="mr-3 mt-3">
+                        <VBtn v-if="!editing" color="error" prepend-icon="mdi-delete" text="Delete Pet"
+                          variant="elevated" @click="showConfirmationDialog = true">
+                        </VBtn>
+                      </div>
+                      <!-- Confirmation Dialog -->
+                      <v-dialog v-model="showConfirmationDialog" max-width="500">
+                        <v-card v-if="!petData.isMissing">
+                          <v-card-title class="text-center font-weight-bold">CONFIRMATION</v-card-title>
+                          <v-card-text class="text-h6">Are you sure you want to delete {{ petData.petDetails.name
+                          }}?</v-card-text>
+                          <v-card-actions class="d-flex justify-end mb-3 mt-3">
+                            <VBtn variant="elevated" color="grey" @click="showConfirmationDialog = false">Cancel
+                            </VBtn>
+                            <VBtn variant="elevated" color="red" @click="deletePet(petData)">Delete</VBtn>
+                          </v-card-actions>
+                        </v-card>
+                        <v-card v-if="petData.isMissing">
+                          <v-card-title class="text-center font-weight-bold">WARNING</v-card-title>
+                          <v-card-text class="text-h6">Uh-Oh... You cannot delete a lost pet. Please mark your pet
+                            as found and try again.</v-card-text>
+                          <v-card-actions class="d-flex justify-end mb-3 mt-3">
+                            <VBtn variant="elevated" color="green" @click="showConfirmationDialog = false">OK
+                            </VBtn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-dialog>
+                    </VRow>
+                  </VContainer>
+                </v-card-text>
+              </VCard>
+              <VCard class="mt-3 mb-3">
+                <VCardTitle>
+                  <h2 class="text-center">QR Code</h2>
+                </VCardTitle>
+                <VCardText>
+                  <p class=text-center>
+                    Attach this QR Code to your pet so that if your pet is lost others can help you find them
+                    <br /><br />
+                    <qrcode-vue :value="qrValue" level="H" ref="qrCode" />
+                    <br />
+                    {{ qrValue }}
+                    <br />
+                    <VBtn @click="downloadQr" color="indigo-lighten-1">Download as Image</VBtn>
+                  </p>
+                </VCardText>
               </VCard>
             </VCol>
           </VRow>
-        </template>
-        <template v-else>
-          <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
+        </VCard>
+        <VCard width="100%">
+          <VCardTitle>
+            <h2 class="text-center">Find your Pet</h2>
+          </VCardTitle>
+          <VCardText>
             <VRow style="width: 100%">
-              <VCol :cols="cols[1]" style="display: flex;">
-                <VImg class="mt-3 mb-3 ml-6" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
-                  <template #placeholder>
-                    <div class="d-flex align-center justify-center fill-height">
-                      <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                    </div>
-                  </template>
-                  <VFadeTransition>
-                    <VBtn location="center" prepend-icon="mdi-upload" text="Upload Image" color="green-darken-1"
-                      @click="triggerImageUpload" :loading="isUploadingNewImage" v-if="editing" :disabled="submitting" />
-                  </VFadeTransition>
-                  <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" accept="image/*" />
-                </VImg>
+              <VCol v-if="!petData.isMissing">
+                <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
+                  class="mb-10 bg-pink-lighten-5">
+                  <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
+                  <VCardActions style="justify-content: center;">
+                    <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>
+                  </VCardActions>
+                </VCard>
               </VCol>
-              <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
-                <VCard class="mt-3 bg-pink-lighten-5">
-                  <v-card-text>
-                    <VContainer fluid>
-                      <VRow>
-                        <VCol :cols="$vuetify.display.mdAndDown ? 12 : 6">
-                          <VCard height="100%">
-                            <VCardTitle>
-                              <h3 class=text-center>Pet Details</h3>
-                            </VCardTitle>
+              <VCol v-else-if="center != undefined">
+                <h2 class="text-center">Chats</h2>
+                <VContainer>
+                  <VRow justify="center">
+                    <VCol :cols="chatCardCols" v-for="chat in chatData">
+                      <ChatCard :chatData="chat" :petID="(chat.petID as string)" />
+                    </VCol>
+                  </VRow>
+                  <VRow justify="center">
+                    <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
+                  </VRow>
+                </VContainer>
+                <VDivider></VDivider>
+                <VContainer>
+                  <VRow>
+                    <VCol cols="8">
+                      <GMapMap :center="center" :zoom="10"
+                        :disableDefaultUI="true" map-type-id="terrain"
+                        style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
+                          zoomControl: true,
+                          mapTypeControl: false,
+                          scaleControl: true,
+                          streetViewControl: false,
+                          rotateControl: true,
+                          fullscreenControl: true,
+                        }">
+                        <GMapMarker v-for="(marker, i) in markers" @click="openMarkerInfo(i)" :key="i" :position="marker.coords" :icon="{ url: '/images/pet-marker.png', scaledSize: { width: 40, height: 40 } }">
+                          <GMapInfoWindow :opened="openedMarkerKey === i">
+                            <p>{{ marker.timeFormatted }}</p>
+                          </GMapInfoWindow>
+                        </GMapMarker>
+                      </GMapMap>
+                    </VCol>
+                    <VCol cols="4" >
+                      <h3>Location Pings</h3>
+                      <div style="height: 400px; overflow: auto;">
+                        <p v-if="markers.length == 0">Sorry, no pings yet.</p>
+                        <VContainer class="py-2" v-for="(marker, i) in markers" >
+                            <VCard @mouseover="openMarkerInfo(i)" @click="center = (markers[i].coords as any)">
+                              <VCardTitle>{{ marker.timeFormatted }}</VCardTitle>
+                              <VCardSubtitle>{{ marker.name }}</VCardSubtitle>
+                            </VCard>
+                        </VContainer>
+                      </div>
+                    </VCol>
+                  </VRow>
+                </VContainer>
 
-                            <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails" />
-
-                            <VCardActions style="justify-content: right;">
-                              <VBtn color="indigo-lighten-1" prepend-icon="mdi-pencil" text="Edit Details"
-                                variant="elevated" @click="startEdit()" v-if="!editing">
-                              </VBtn>
-                              <template v-else>
-                                <VBtn color="grey-darken-1" variant="elevated" @click="cancelEdit()"
-                                  :disabled="submitting">
-                                  Cancel</VBtn>
-                                <VBtn :color="submitError ? 'error' : 'success'" variant="elevated" @click="submitEdit()"
-                                  :loading="submitting">Save Changes</VBtn>
-                              </template>
-                            </VCardActions>
-                          </VCard>
-                        </VCol>
-                        <VCol>
-                          <VCard height="100%">
-                            <VCardTitle>
-                              <h3 class=text-center>Contact Details</h3>
-                            </VCardTitle>
-                            <PetProfileContactDetails :data="userData?.userDetails"/>
-                          </VCard>
-                        </VCol>
-                      </VRow>
-                      <VRow style="justify-content: right;">
-                        <div class="mr-3 mt-3">
-                          <VBtn v-if="!editing" color="error" prepend-icon="mdi-delete" text="Delete Pet"
-                            variant="elevated" @click="showConfirmationDialog = true">
-                          </VBtn>
-                        </div>
-                        <!-- Confirmation Dialog -->
-                        <v-dialog v-model="showConfirmationDialog" max-width="500">
-                          <v-card v-if="!petData.isMissing">
-                            <v-card-title class="text-center font-weight-bold">CONFIRMATION</v-card-title>
-                            <v-card-text class="text-h6">Are you sure you want to delete {{ petData.petDetails.name
-                            }}?</v-card-text>
-                            <v-card-actions class="d-flex justify-end mb-3 mt-3">
-                              <VBtn variant="elevated" color="grey" @click="showConfirmationDialog = false">Cancel
-                              </VBtn>
-                              <VBtn variant="elevated" color="red" @click="deletePet(petData)">Delete</VBtn>
-                            </v-card-actions>
-                          </v-card>
-                          <v-card v-if="petData.isMissing">
-                            <v-card-title class="text-center font-weight-bold">WARNING</v-card-title>
-                            <v-card-text class="text-h6">Uh-Oh... You cannot delete a lost pet. Please mark your pet
-                              as found and try again.</v-card-text>
-                            <v-card-actions class="d-flex justify-end mb-3 mt-3">
-                              <VBtn variant="elevated" color="green" @click="showConfirmationDialog = false">OK
-                              </VBtn>
-                            </v-card-actions>
-                          </v-card>
-                        </v-dialog>
-                      </VRow>
-                    </VContainer>
-                  </v-card-text>
-                </VCard>
-                <VCard class="mt-3 mb-3">
-                  <VCardTitle>
-                    <h2 class="text-center">QR Code</h2>
-                  </VCardTitle>
-                  <VCardText>
-                    <p class=text-center>
-                      Attach this QR Code to your pet so that if your pet is lost others can help you find them
-                      <br /><br />
-                      <qrcode-vue :value="qrValue" level="H" ref="qrCode" />
-                      <br />
-                      {{ qrValue }}
-                      <br />
-                      <VBtn @click="downloadQr" color="indigo-lighten-1">Download as Image</VBtn>
-                    </p>
-                  </VCardText>
-                </VCard>
               </VCol>
             </VRow>
-          </VCard>
-          <VCard width="100%">
-            <VCardTitle>
-              <h2 class="text-center">Find your Pet</h2>
-            </VCardTitle>
-            <VCardText>
-              <VRow style="width: 100%">
-                <VCol v-if="!petData.isMissing">
-                  <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
-                    class="mb-10 bg-pink-lighten-5">
-                    <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
-                    <VCardActions style="justify-content: center;">
-                      <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>
-                    </VCardActions>
-                  </VCard>
-                </VCol>
-                <VCol v-else-if="center != undefined">
-                  <h2 class="text-center">Chats</h2>
-                  <VContainer>
-                    <VRow justify="center">
-                      <VCol :cols="chatCardCols" v-for="chat in chatData">
-                        <ChatCard :chatData="chat" :petID="(chat.petID as string)" />
-                      </VCol>
-                    </VRow>
-                    <VRow justify="center">
-                      <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
-                    </VRow>
-                  </VContainer>
-                  <VDivider></VDivider>
-                  <VContainer>
-                    <VRow>
-                      <VCol cols="8">
-                        <GMapMap :center="center" :zoom="10"
-                          :disableDefaultUI="true" map-type-id="terrain"
-                          style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
-                            zoomControl: true,
-                            mapTypeControl: false,
-                            scaleControl: true,
-                            streetViewControl: false,
-                            rotateControl: true,
-                            fullscreenControl: true,
-                          }">
-                          <GMapMarker v-for="(marker, i) in markers" @click="openMarkerInfo(i)" :key="i" :position="marker.coords" :icon="{ url: '/images/pet-marker.png', scaledSize: { width: 40, height: 40 } }">
-                            <GMapInfoWindow :opened="openedMarkerKey === i">
-                              <p>{{ marker.timeFormatted }}</p>
-                            </GMapInfoWindow>
-                          </GMapMarker>
-                        </GMapMap>
-                      </VCol>
-                      <VCol cols="4" >
-                        <h3>Location Pings</h3>
-                        <div style="height: 400px; overflow: auto;">
-                          <p v-if="markers.length == 0">Sorry, no pings yet.</p>
-                          <VContainer class="py-2" v-for="(marker, i) in markers" >
-                              <VCard @mouseover="openMarkerInfo(i)" @click="center = (markers[i].coords as any)">
-                                <VCardTitle>{{ marker.timeFormatted }}</VCardTitle>
-                                <VCardSubtitle>{{ marker.name }}</VCardSubtitle>
-                              </VCard>
-                          </VContainer>
-                        </div>
-                      </VCol>
-                    </VRow>
-                  </VContainer>
-
-                </VCol>
-              </VRow>
-            </VCardText>
-          </VCard>
-        </template>
+          </VCardText>
+        </VCard>
       </template>
     </VFadeTransition>
   </v-container>
