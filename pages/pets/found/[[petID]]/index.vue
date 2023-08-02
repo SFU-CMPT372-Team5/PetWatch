@@ -69,6 +69,9 @@
                                             <VCol cols="6">
                                                 <ChatLauncher :loggedIn="loggedIn" :ownerName="ownerName"/>
                                             </VCol>
+                                            <VCol cols="6">
+                                                <MapLauncher :petID="($route.params.petID as string)"/>
+                                            </VCol>
                                         </VRow>
                                     </VCardText>
                                 </VCard>
@@ -147,10 +150,11 @@ import type PetModel from "~/types/models/pet"
 import type { UserDetails } from "~/types/models/user";
 import { type LimitedPetModel } from "~/types/models/pet";
 import ChatLauncher from "~/components/foundPet/ChatLauncher.vue"
+import MapLauncher from "~/components/foundPet/MapLauncher.vue"
 const { getSession} = useAuth();
 
 export default {
-    components: {PetDetails, ContactDetails, ChatLauncher},
+    components: {PetDetails, ContactDetails, ChatLauncher, MapLauncher},
     async setup() {
         const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
 
@@ -199,6 +203,6 @@ export default {
 
             return (petData?.value as PetModel)?.contactDetails.name ?? "The Pet's Owner"
         }
-    }
+    },
 }
 </script>
