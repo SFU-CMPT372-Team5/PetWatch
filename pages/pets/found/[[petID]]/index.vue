@@ -36,13 +36,7 @@
                     <VCard class="mb-1" width="100%">
                         <VRow style="width: 100%">
                         <VCol :cols="colWidths[0]" style="display: flex;">
-                            <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
-                                <template #placeholder>
-                                    <div class="d-flex align-center justify-center fill-height">
-                                    <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                                    </div>
-                                </template>
-                            </VImg>
+                            <PetProfilePetImage :petData="petData"/>
                         </VCol>
                         <VCol :cols="colWidths[1]" style="justify-content: space-around; display: flex; flex-direction: column;">
                             <VCard color="grey-lighten-4" class="mb-4">
@@ -98,34 +92,7 @@
                     <VRow class="fill-height" justify="center" align="center">
                         <VCol :cols="cardWidthCols">
                             <VCard>
-                                <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
-                                    <template #placeholder>
-                                        <div class="d-flex align-center justify-center fill-height">
-                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                                        </div>
-                                    </template>
-                                </VImg>
-                                <VCardTitle>You met {{ petData?.petDetails.name }}!</VCardTitle>
-                                <!-- <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="112"></v-icon> -->
-                                
-                                <VCardText>
-                                    {{ petData!.petDetails.name }} isn't marked as lost. No further action is required.
-                                </VCardText>
-                            </VCard>
-                        </VCol>
-                    </VRow>            
-                </template>
-                <template v-else>
-                    <VRow class="fill-height" justify="center" align="center">
-                        <VCol :cols="cardWidthCols">
-                            <VCard>
-                                <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
-                                    <template #placeholder>
-                                        <div class="d-flex align-center justify-center fill-height">
-                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                                        </div>
-                                    </template>
-                                </VImg>
+                                <PetProfilePetImage :petData="petData"/>
                                 <VCardTitle>You met {{ petData?.petDetails.name }}!</VCardTitle>
                                 <!-- <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="112"></v-icon> -->
                                 
@@ -142,8 +109,6 @@
 </template>
 
 <script setup lang="ts">
-const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
-
 const route = useRoute();
 
 const limitedDataRes = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
@@ -170,11 +135,6 @@ watch(limitedDataRes.pending, async (dataVal) => {
         return;
     }
 })
-
-const petImageUrl = computed(() => {
-    return petData.value?.imageURL ?? PLACEHOLDER_IMAGE_URL
-})
-
 </script>
 
 <script lang="ts">
