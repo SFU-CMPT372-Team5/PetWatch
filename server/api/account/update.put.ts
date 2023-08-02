@@ -1,8 +1,15 @@
 import { user } from '../../mongo/models'
 import { getToken } from '#auth'
 
+//const sgMail = require('@sendgrid/mail')
+import sgMail from '@sendgrid/mail'
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY1!);
+
+
 export default defineEventHandler(async (event) => {
     const token = await getToken({event});
+
     const body = await readBody(event);
 
     if (body.userDetails == undefined) {
@@ -18,6 +25,23 @@ export default defineEventHandler(async (event) => {
                 "userDetails.address": body.userDetails.address,
                 "userDetails.phone": body.userDetails.phone 
             });
+
+            await user.findOneAndUpdate({ User_UID: token?.sub }, { userDetails: body.userDetails })
+            const msg = {
+                to:  body.userDetails.email, // Change to your recipient
+                from: 'petwatchmanagement@gmail.com', // Change to your verified sender
+                subject: 'PetWatch Account Updated',
+                text: 'Your PetWatch Account Details were recently edited, Please ensure this was correct.',
+                html: '<strong>Hello! Your PetWatch Account Details were recently edited, Please ensure this was correct.</strong>',
+            }
+            sgMail
+            .send(msg)
+            .then(() => {
+                console.log('Email sent')
+            })
+            .catch((error: any) => {
+                console.error(error)
+            })
             
             return {message: "Account updated"}
         } catch (e) {

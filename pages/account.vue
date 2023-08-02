@@ -79,12 +79,18 @@ import type UserModel from "types/models/user";
 import type PetModel from "types/models/pet";
 import ContactDetails from '~/components/petProfile/ContactDetails.vue';
 
+import axios from 'axios';
+
 export default {
     components: {ContactDetails},
     data() {
         return {
             drawer: false,
             isEditing: false,
+
+            subject: 'test',
+            message: 't',
+
             submittingAccountUpdate: false,
             accountUpdateError: false
         }

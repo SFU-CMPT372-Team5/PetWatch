@@ -35,7 +35,9 @@ export default {
             type: Object as PropType<ChatModel>,
             required: true
         },
-        petID: String
+        petID: String,
+        strangerName:String
+        
     },
     data() {
         return {
