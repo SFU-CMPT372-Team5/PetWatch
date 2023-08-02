@@ -23,7 +23,7 @@
                                 <span v-else class="text-h5">Editing</span>
                             </v-card-title>
 
-                            <VCardText style="max-width: 50%;">
+                            <VCardText :style="{maxWidth: $vuetify.display.smAndDown ? 'unset':'50%'}">
                                 <VContainer fluid>
                                     <ContactDetails :data="apiData?.userDetails" :editing="isEditing" ref="form" />
                                 </VContainer>
