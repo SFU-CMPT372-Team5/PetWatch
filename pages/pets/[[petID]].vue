@@ -49,18 +49,7 @@
         <VCard class="mb-3 bg-indigo-lighten-3" width="100%">
           <VRow style="width: 100%">
             <VCol :cols="cols[1]" style="display: flex;">
-              <VImg class="mt-3 mb-3 ml-6" :src="imageUrl" :lazy-src="placeholderImgURL" cover>
-                <template #placeholder>
-                  <div class="d-flex align-center justify-center fill-height">
-                    <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
-                  </div>
-                </template>
-                <VFadeTransition>
-                  <VBtn location="center" prepend-icon="mdi-upload" text="Upload Image" color="green-darken-1"
-                    @click="triggerImageUpload" :loading="isUploadingNewImage" v-if="editing" :disabled="submitting" />
-                </VFadeTransition>
-                <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" accept="image/*" />
-              </VImg>
+              <PetProfilePetImage class="mt-3 mb-3 ml-3 rounded" ref="petImage" :editing="editing" :disabled="submitting" :petData="petData"/>
             </VCol>
             <VCol :cols="cols[0]" style="justify-content: space-around; display: flex; flex-direction: column;">
               <VCard class="mt-3 bg-pink-lighten-5">
@@ -244,9 +233,6 @@ import ChatCard from "~/components/petProfile/ChatCard.vue";
 import PetDetails from "~/components/petProfile/PetDetails.vue"
 import type PetModel from "~/types/models/pet";
 import type ChatModel from 'types/models/chat'
-import { user } from 'server/mongo/models';
-
-const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
 
 const config = useRuntimeConfig()
 const googleKey = config.public.googleKey
@@ -264,23 +250,6 @@ export default {
       if (this.$vuetify.display.md) return 4;
       if (this.$vuetify.display.sm) return 6;
       return 12;
-    },
-
-    imageUrl() {
-      if (this.editing) {
-        if (this.uploadedImageData != undefined) {
-          return URL.createObjectURL(this.uploadedImageData)
-        }
-      }
-
-      if (this.petData?.imageURL != undefined && this.petData?.imageURL?.length > 0) {
-        return this.petData.imageURL;
-      }
-
-      return PLACEHOLDER_IMAGE_URL;
-    },
-    placeholderImgURL() {
-      return PLACEHOLDER_IMAGE_URL
     }
   },
   data() {
@@ -297,11 +266,6 @@ export default {
 
       submitting: false, //Loading spinner for save changes
       submitError: false,
-
-      isUploadingNewImage: false, //Loading spinner for uploading a file
-      uploadedImageData: undefined as File | undefined,
-      inEditImageURL: undefined as undefined | string,
-
     }
   },
   components: { QrcodeVue, ChatCard, PetDetails },
@@ -372,6 +336,10 @@ export default {
       })
       .finally(() => petPending.value = false);
 
+    useHead({
+      title: `${petData.value != undefined ? `${petData.value.petDetails.name}'s Pet Profile` : 'Pet Profile'} | PetWatch`
+    })
+
     return { userData, petData, chatData, userPending, petPending, chatPending, center, markers, lastSeenByOwner };
   },
   methods: {
@@ -393,8 +361,6 @@ export default {
       xhr.send();
     },
     startEdit() {
-      this.uploadedImageData = undefined;
-      this.inEditImageURL = this.petData?.imageURL;
       this.editing = true;
     },
     cancelEdit() {
@@ -420,8 +386,10 @@ export default {
       newPetDetails.breed != undefined && newPetDetails.breed.length > 0 ? editSubmit.append("breed", newPetDetails.breed) : null;
       newPetDetails.colour != undefined && newPetDetails.colour.length > 0 ? editSubmit.append("colour", newPetDetails.colour) : null;
 
-      if (this.uploadedImageData != undefined) { //Potentially new image uploaded
-        editSubmit.append("image", this.uploadedImageData);
+      const petImage = (this.$refs.petImage as any)
+
+      if (petImage != undefined && petImage.newImagePending()) { //Potentially new image uploaded
+        editSubmit.append("image", petImage.uploadedImageData)
       }
 
       try {
@@ -431,24 +399,23 @@ export default {
         })
 
         if (editRes.status == 200) {
+          this.petData!.imageURL = petImage.inEditUrl;
+
+          for (const pair of editSubmit.entries()) {
+            switch (pair[0]) {
+              case "name":
+              case "species":
+              case "breed":
+              case "colour":
+                this.petData!.petDetails[pair[0]] = pair[1].toString().trim()
+                break;
+            }
+          }
+
           setTimeout(() => { //Makes it look nicer if a bit of delay
             this.submitting = false;
             this.editing = false;
             this.submitError = false;
-            this.isUploadingNewImage = false; //Because the new image is now the "original"
-            this.petData!.imageURL = this.inEditImageURL;
-
-            for (const pair of editSubmit.entries()) {
-              switch (pair[0]) {
-                case "name":
-                case "species":
-                case "breed":
-                case "colour":
-                  this.petData!.petDetails[pair[0]] = pair[1].toString().trim()
-                  break;
-              }
-            }
-
           }, 300)
         } else {
           this.submitError = true;
@@ -483,24 +450,6 @@ export default {
         alert(`An error occurred while deleting ${name}.`);
       }
     },
-
-    triggerImageUpload() {
-      this.isUploadingNewImage = true;
-
-      window.addEventListener('focus', () => {
-        this.isUploadingNewImage = false
-      }, { once: true });
-
-      (this.$refs.imgUploader as HTMLElement)?.click();
-    },
-
-    handleImageChange(event: Event) {
-      if ((event.target as HTMLInputElement)?.files && (event.target as HTMLInputElement).files!.length > 0) {
-        this.uploadedImageData = (event.target as HTMLInputElement).files![0];
-        this.inEditImageURL = URL.createObjectURL(this.uploadedImageData);
-      }
-    },
-
 
     async setLost(newLostStatus: boolean) {
       if (newLostStatus && this.petData!.isMissing) return;

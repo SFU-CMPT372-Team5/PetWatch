@@ -44,8 +44,9 @@
                                 <span class="text-h5 ml-3">Your Pets</span>
                             </VCardText>
                             <VCardActions class="mr-6" style="justify-content: end">
-                                <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                    new Pet</VBtn>
+                                <NewPet/>
+                                <!-- <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                    new Pet</VBtn> -->
                             </VCardActions>
                         </VRow>
                         <VContainer fluid>
@@ -54,7 +55,7 @@
                                     v-for="pet in (petApiData as PetModel[])" :cols="chatCardCols">
                                     <VCard class="bg-grey-darken-3" @click="navigateTo('/pets/' + pet.Pet_UID)">
                                         <VCardTitle class="text-center">{{ pet.petDetails.name }}</VCardTitle>
-                                        <VImg :src="pet.imageURL ?? '/images/paw.jpg'" cover />
+                                        <PetProfilePetImage :petData="pet"/>
                                     </VCard>
                                 </VCol>
                                 <VCol v-else>
@@ -89,6 +90,9 @@ export default {
         }
     },
     async setup() {
+        useHead({
+            title: "My Account | PetWatch"
+        })
         definePageMeta({
             middleware: "auth"
         })
