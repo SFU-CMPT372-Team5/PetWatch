@@ -9,7 +9,7 @@ export async function purgeChatForPet(petID: string) {
         chatIDs.forEach(async (chatHost) => {
             try {
                 await message.deleteMany({
-                    Chat_UID: chatHost.Chat_UID
+                    chatID: chatHost.Chat_UID
                 })
             } catch(e) {
                 console.error(e);

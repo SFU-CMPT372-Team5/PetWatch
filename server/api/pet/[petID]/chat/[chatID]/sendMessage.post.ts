@@ -1,4 +1,5 @@
 import { getToken } from '#auth'
+import MessageModel from '~/types/models/message';
 import { message, chat } from '../../../../../mongo/models';
 
 export default defineEventHandler(async (event) => {
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
         if (hostChat != undefined) {
             const sentMessage = await message.create({
-                "Chat_UID": event.context.params.chatID,
+                chatID: event.context.params.chatID,
                 text: body.text,
                 timeSent: Date.now(),
                 isOwnerMessage: hostChat.ownerID == token.sub
@@ -28,7 +29,7 @@ export default defineEventHandler(async (event) => {
                 setResponseStatus(event, 500)
                 return {status: 500};
             } else {
-                return sentMessage
+                return sentMessage as MessageModel
             }
         } else {
             setResponseStatus(event, 404)

@@ -6,7 +6,7 @@
             :color="authorIsLocal ? 'teal' : ''"
         >
         <!-- "ready" makes the animation pretty -->
-        <VCardText>{{ messageContent }} {{ scrollAtBottom }}</VCardText>
+        <VCardText>{{ messageContent }}</VCardText>
         </VCard>
     </component>
 </template>
