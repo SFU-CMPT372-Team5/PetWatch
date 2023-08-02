@@ -25,7 +25,14 @@ export default interface PetModel extends LimitedPetModel {
                 lng: Number
             }, //Address or map pin (coordinates)
             time: Number //Unix Timestamp, Date::getTime() in node
-        }]
+        }],
+        lastSeenByOwner: {
+            location: {
+                lat: Number,
+                lng: Number
+            },
+            time: Number           
+        }
     },
 }
 

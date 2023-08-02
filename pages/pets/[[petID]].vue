@@ -184,7 +184,23 @@
                               <p>{{ marker.timeFormatted }}</p>
                             </GMapInfoWindow>
                           </GMapMarker>
+                          <GMapMarker v-if="selectingLocation" @drag="handleDrag" :position="lastSeenByOwner? lastSeenByOwner : center" :draggable="true">
+                            <GMapInfoWindow>
+                              <p>Drag me</p>
+                            </GMapInfoWindow>
+                          </GMapMarker>
+                          <GMapMarker v-else-if="lastSeenByOwner != undefined" :position="lastSeenByOwner" :icon="{
+                            url: '/images/user-marker.png',
+                            scaledSize: { width: 70, height: 70 },
+                            }"></GMapMarker>
                         </GMapMap>
+                        <VBtn @click="selectingLocation = true" v-if="!selectingLocation" class="ma-2 pa-2">Set last seen</VBtn>
+                        <div v-else class="d-flex mb-6">
+                          <VBtn @click="selectLocation" class="ma-2 pa-2" color="green-lighten-2">Done</VBtn>
+                          <VBtn @click="selectingLocation = false" class="ma-2 pa-2 me-auto" color="red-lighten-2">Cancel</VBtn>
+                          <VBtn @click="removeLocation" class="ma-2 pa-2" color="red-darken-2">Remove last seen</VBtn>
+                        </div>
+
                       </VCol>
                       <VCol cols="4" >
                         <h3>Location Pings</h3>
@@ -264,6 +280,7 @@ export default {
       // center: { lat: 49.18915852522481, lng: -122.85014097753391 },
       // markers: [] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[],
       openedMarkerKey: null as number | null,
+      selectingLocation: false,
 
       showConfirmationDialog: false,
 
@@ -294,6 +311,7 @@ export default {
 
     let markers = ref([] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[])
     let center = ref({ lat: 49.18915852522481, lng: -122.85014097753391 })
+    let lastSeenByOwner = ref(undefined as { lat: Number; lng: Number; } | undefined);
 
     $fetch<UserModel>(`/api/account/info`)
       .then((userRes) => {
@@ -304,6 +322,7 @@ export default {
     $fetch<PetModel>(`/api/pet/${route.params.petID}`)
       .then(async (petRes) => {
         petData.value = petRes;
+        lastSeenByOwner.value = petRes.missingDetails?.lastSeenByOwner?.location
 
         if (petRes.isMissing) {
           $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
@@ -342,7 +361,7 @@ export default {
       })
       .finally(() => petPending.value = false);
 
-    return { userData, petData, chatData, userPending, petPending, chatPending, center, markers };
+    return { userData, petData, chatData, userPending, petPending, chatPending, center, markers, lastSeenByOwner };
   },
   methods: {
     downloadQr() {
@@ -493,6 +512,43 @@ export default {
     openMarkerInfo(i: number | null) {
       this.openedMarkerKey = i
     },
+
+    handleDrag(e: any) {
+      const res = {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng()
+    }
+      this.lastSeenByOwner = res
+    },
+
+    async removeLocation() {
+      await $fetch(`/api/pet/${this.petData?.Pet_UID}/locationByOwner`, {
+                method: 'PUT',
+                body: {
+                    location: null,
+                    time: null
+                }
+            })
+            .catch(e => {
+                alert("Failed to set location")
+            })
+      this.lastSeenByOwner = undefined
+      this.selectingLocation = false
+    },
+
+    async selectLocation() {
+      await $fetch(`/api/pet/${this.petData?.Pet_UID}/locationByOwner`, {
+                method: 'PUT',
+                body: {
+                    location: this.lastSeenByOwner,
+                    time: Date.now()
+                }
+            })
+            .catch(e => {
+                alert("Failed to set location")
+            })
+      this.selectingLocation = false
+    }
   }
 };
 

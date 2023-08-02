@@ -33,7 +33,14 @@ const schema = new mongoose.Schema({
                 lng: Number
             }, //Address or map pin (coordinates)
             time: Number //Unix Timestamp, Date::getTime() in node
-        }]
+        }],
+        lastSeenByOwner: {
+            location: {
+                lat: Number,
+                lng: Number
+            },
+            time: Number           
+        }
     },
 
     chats: [String]
