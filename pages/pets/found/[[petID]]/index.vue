@@ -84,12 +84,36 @@
                                         <VCol cols="6">
                                             <ChatLauncher :loggedIn="loggedIn" :ownerName="ownerName"/>
                                         </VCol>
+                                        <VCol cols="6">
+                                            <MapLauncher :petID="(route.params.petID as string)"/>
+                                        </VCol>
                                     </VRow>
                                 </VCardText>
                             </VCard>
                         </VCol>
                         </VRow>
                     </VCard>
+                </template>
+                <template v-else>
+                    <VRow class="fill-height" justify="center" align="center">
+                        <VCol :cols="cardWidthCols">
+                            <VCard>
+                                <VImg :src="petImageUrl" :lazy-src="PLACEHOLDER_IMAGE_URL" cover >
+                                    <template #placeholder>
+                                        <div class="d-flex align-center justify-center fill-height">
+                                        <v-progress-circular color="grey-lighten-4" indeterminate></v-progress-circular>
+                                        </div>
+                                    </template>
+                                </VImg>
+                                <VCardTitle>You met {{ petData?.petDetails.name }}!</VCardTitle>
+                                <!-- <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="112"></v-icon> -->
+                                
+                                <VCardText>
+                                    {{ petData!.petDetails.name }} isn't marked as lost. No further action is required.
+                                </VCardText>
+                            </VCard>
+                        </VCol>
+                    </VRow>            
                 </template>
                 <template v-else>
                     <VRow class="fill-height" justify="center" align="center">
@@ -159,10 +183,11 @@ import ContactDetails from "~/components/petProfile/ContactDetails.vue";
 import type PetModel from "~/types/models/pet"
 import { type LimitedPetModel } from "~/types/models/pet";
 import ChatLauncher from "~/components/foundPet/ChatLauncher.vue"
+import MapLauncher from "~/components/foundPet/MapLauncher.vue"
 const { getSession} = useAuth();
 
 export default {
-    components: {PetDetails, ContactDetails, ChatLauncher},
+    components: {PetDetails, ContactDetails, ChatLauncher, MapLauncher},
     computed: {
         colWidths() {
             return this.$vuetify.display.smAndDown ? [12, 12] : [5, 7]
@@ -178,6 +203,6 @@ export default {
 
             return (petData?.value as PetModel)?.contactDetails.name ?? "The Pet's Owner"
         }
-    }
+    },
 }
 </script>
