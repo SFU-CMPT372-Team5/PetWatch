@@ -168,7 +168,7 @@
                 <VDivider></VDivider>
                 <VContainer>
                   <VRow>
-                    <VCol cols="8">
+                    <VCol :cols="$vuetify.display.mdAndDown ? 12 : 8">
                       <GMapMap :center="center" :zoom="10"
                         :disableDefaultUI="true" map-type-id="terrain"
                         style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
@@ -186,9 +186,9 @@
                         </GMapMarker>
                       </GMapMap>
                     </VCol>
-                    <VCol cols="4" >
+                    <VCol :cols="$vuetify.display.mdAndDown ? 12 : 4" >
                       <h3>Location Pings</h3>
-                      <div style="height: 400px; overflow: auto;">
+                      <div :style="[$vuetify.display.mdAndDown ? {'height': 'auto', 'overflow': 'auto'} : {'height': '400px', 'overflow': 'auto'}]">
                         <p v-if="markers.length == 0">Sorry, no pings yet.</p>
                         <VContainer class="py-2" v-for="(marker, i) in markers" >
                             <VCard @mouseover="openMarkerInfo(i)" @click="center = (markers[i].coords as any)">
