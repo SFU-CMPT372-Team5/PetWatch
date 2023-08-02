@@ -7,7 +7,7 @@
         <template v-else>
             <VCardTitle>
                 <!-- Proper things coming soon -->
-                {{ strangerDetails?.name }}
+                {{ strangerName }}
             </VCardTitle>
             <VCardText :class="textPending ? '' : 'truncateOneLine'">
                 <VProgressCircular v-if="textPending" indeterminate/>
