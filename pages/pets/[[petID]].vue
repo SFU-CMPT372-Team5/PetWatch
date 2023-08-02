@@ -410,7 +410,13 @@ export default {
         this.submitError = true;
         this.submitting = false;
         console.error('Error updating pet information:', e);
-        alert('An error occurred while updating pet information.');
+        debugger
+
+        if ("status" in (e as any) && (e as any).status === 413) {
+          alert("Image uploaded is too large! Please try again with a smaller image.")
+        } else {
+          alert('An error occurred while updating pet information. Please try again.');
+        }
       }
     },
 
