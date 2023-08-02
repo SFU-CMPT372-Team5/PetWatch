@@ -164,37 +164,6 @@
                   </VCardActions>
                 </VCard>
               </VCol>
-              <VCol v-else>
-                <h2 class="text-center">Chats</h2>
-                <VContainer>
-                  <VRow justify="center">
-                    <VCol :cols="chatCardCols" v-for="chat in chatData">
-                      <ChatCard :chatData="chat" :petID="(chat.petID as string)" />
-                    </VCol>
-                  </VRow>
-                  <VRow justify="center">
-                    <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
-                  </VRow>
-                </VContainer>
-              </VCol>
-            </VRow>
-          </VCardText>
-        </VCard>
-        <VCard width="100%">
-          <VCardTitle>
-            <h2 class="text-center">Find your Pet</h2>
-          </VCardTitle>
-          <VCardText>
-            <VRow style="width: 100%">
-              <VCol v-if="!petData.isMissing">
-                <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
-                  class="mb-10 bg-pink-lighten-5">
-                  <VCardTitle class="text-center">Your pet isn't currently marked as missing</VCardTitle>
-                  <VCardActions style="justify-content: center;">
-                    <VBtn @click="setLost(true)" color="error" variant="elevated">Mark Pet as Lost</VBtn>
-                  </VCardActions>
-                </VCard>
-              </VCol>
               <VCol v-else-if="center != undefined">
                 <h2 class="text-center">Chats</h2>
                 <VContainer>
