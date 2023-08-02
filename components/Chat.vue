@@ -171,7 +171,7 @@ export default {
             if (!this.refreshing) this.refreshMessages();
         }, 5000)
     },
-    onUnmounted() {
+    unmounted() {
         clearInterval(this.updater);
     }
 }

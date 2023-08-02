@@ -55,7 +55,7 @@ export default {
 
         this.fetchChats();
     },
-    onUnmounted() {
+    unmounted() {
         clearInterval(this.chatRefresh);  
     }
     
