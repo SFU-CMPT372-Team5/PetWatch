@@ -2,6 +2,9 @@ import { Storage } from "@google-cloud/storage";
 const BUCKET_NAME = "petwatch-images";
 const BASE_PUB_URL = `https://storage.googleapis.com/${BUCKET_NAME}/`
 
+//@ts-expect-error For some reason Typescript doesn't see that allowSyntheticDefaultImport is set and this errors anyway
+import gcpServiceAccount from "~/gcp_service_account.json"
+
 export type TypeCloudStorageManager = typeof CloudStorageManager
 class CloudStorageManager {
     static Instance: CloudStorageManager
@@ -9,7 +12,7 @@ class CloudStorageManager {
     Storage: Storage
     constructor() {
         this.Storage = new Storage({
-            keyFilename: "gcp_service_account.json",
+            credentials: gcpServiceAccount,
             projectId: "cmpt372-team5-petwatch"
         });
 

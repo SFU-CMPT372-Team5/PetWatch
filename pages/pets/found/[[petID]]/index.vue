@@ -1,8 +1,8 @@
 <template>
-    <v-sheet elevation="12" width="100vw" class="pa-4 text-center mx-auto fill-height" :color="(!pending && !found) || petData?.isMissing ? 'red-accent-1' : 'blue-accent-1'" style="transition: background-color 1s linear;">
+    <v-sheet elevation="12" width="100vw" class="pa-4 text-center mx-auto fill-height" :color="(!petPending && !found) || petData?.isMissing ? 'red-accent-1' : 'blue-accent-1'" style="transition: background-color 1s linear;">
         <VFadeTransition group>
             <!-- Loading -->
-            <SharedPageLoading v-if="pending"/>
+            <SharedPageLoading v-if="petPending"/>
             
             <!-- Loaded w/out data -->
             <VRow v-else-if="!found" class="fill-height" justify="center" align="center">
@@ -79,7 +79,7 @@
                                             <ChatLauncher :loggedIn="loggedIn" :ownerName="ownerName"/>
                                         </VCol>
                                         <VCol cols="6">
-                                            <MapLauncher :petID="(route.params.petID as string)"/>
+                                            <MapLauncher :petID="$route.params.petID"/>
                                         </VCol>
                                     </VRow>
                                 </VCardText>
@@ -111,21 +111,18 @@
 <script setup lang="ts">
 const route = useRoute();
 
-const limitedDataRes = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
-const contactDataRes = await useLazyFetch(`/api/pet/${route.params.petID}/contactDetails`);
-const contactData = contactDataRes.data;
-const petData = limitedDataRes.data;
-const pending = limitedDataRes.pending;
+const {data: petData, pending: petPending, error: petError} = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
+const {data: contactData, error: contactError} = await useLazyFetch<UserDetails>(`/api/pet/${route.params.petID}/ownerDetails`);
 
 const session = await getSession();
 
 let found = false;
 const loggedIn = session.user != undefined;
 
-watch(limitedDataRes.pending, async (dataVal) => {
+watch(petPending, async (dataVal) => {
     if (dataVal == true) return;
 
-    if (limitedDataRes.error.value != undefined) return;
+    if (petError.value != undefined) return;
     found = true;
 
     const {data: amOwner, error} = await useFetch<{owner: boolean}>(`/api/pet/${route.params.petID}/amOwner`)
@@ -139,6 +136,13 @@ watch(limitedDataRes.pending, async (dataVal) => {
 useHead({
     title: `Found ${petData.value != undefined ? `${petData.value.petDetails.name}` : 'Found Pet'} | PetWatch`
 })
+
+definePageMeta({
+    validate: (route) => {
+        //Don't load page if petID not provided
+        return typeof(route.params.petID) === "string" && route.params.petID.length > 0;
+    }
+})
 </script>
 
 <script lang="ts">
@@ -146,6 +150,8 @@ import PetDetails from "~/components/petProfile/PetDetails.vue"
 import ContactDetails from "~/components/petProfile/ContactDetails.vue";
 import type PetModel from "~/types/models/pet"
 import { type LimitedPetModel } from "~/types/models/pet";
+import { type UserDetails } from "~/types/models/user"
+
 import ChatLauncher from "~/components/foundPet/ChatLauncher.vue"
 import MapLauncher from "~/components/foundPet/MapLauncher.vue"
 const { getSession} = useAuth();

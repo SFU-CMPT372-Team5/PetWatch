@@ -1,3 +1,4 @@
 {
-    "ssr": false 
+    "ssr": false,
+    "imageUploadMaxBytes": 10485760
 }
