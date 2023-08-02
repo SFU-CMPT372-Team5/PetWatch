@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     // If the chat entry is found, create and save the message with the provided text and other details.
     if (hostChat != undefined) {
       const sentMessage = await message.create({
-        Chat_UID: event.context.params.chatID,
+        chatID: event.context.params.chatID,
         text: body.text,
         timeSent: Date.now(),
         isOwnerMessage: hostChat.ownerID == token.sub,

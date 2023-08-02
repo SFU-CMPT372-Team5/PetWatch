@@ -16,7 +16,7 @@
     
             <!-- <VCardText>Laura: This is a message</VCardText> -->
             <VCardActions style="justify-content: center;">
-                <ChatLauncher :chatID="chatData.Chat_UID" :petID="petID"/>
+                <ChatLauncher :chatID="chatData.Chat_UID" :petID="petID" :strangerName="strangerDetails?.name"/>
             </VCardActions>
         </template>
     </VCard>
@@ -35,9 +35,7 @@ export default {
             type: Object as PropType<ChatModel>,
             required: true
         },
-        petID: String,
-        strangerName:String
-        
+        petID: String,        
     },
     data() {
         return {

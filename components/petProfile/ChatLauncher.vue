@@ -16,7 +16,7 @@
         </template>
         
         <VCard class="fill-height" density="compact">
-            <Chat :chatID="chatUID" :petID="petID" strangerName="Finder" :isStranger="false" @close="closeChat()"/>
+            <Chat :chatID="chatUID" :petID="petID" :isStranger="false" :strangerName="strangerName" @close="closeChat()"/>
         </VCard>
     </v-dialog>
 </template>
@@ -29,7 +29,8 @@ export default {
     components: {Chat},
     props: {
         petID: String,
-        chatID: String
+        chatID: String,
+        strangerName: String
     },
     data () {
         return {
