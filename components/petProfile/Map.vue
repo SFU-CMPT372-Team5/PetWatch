@@ -37,8 +37,9 @@
 <script lang="ts">
 import {LocationPoint} from 'types/models/pet';
 
-const config = useRuntimeConfig()
-const googleKey = config.public.googleKey
+// Importing runtime configuration and Google API key
+const config = useRuntimeConfig();
+const googleKey = config.public.googleKey; // The Google API key used for geocoding
 
 export default {
     props: {
@@ -49,7 +50,7 @@ export default {
     },
     data() {
         return {
-            openedMarkerKey: null as number | null,
+            openedMarkerKey: null as number | null, // Key of the currently opened marker info window
             updater: undefined as NodeJS.Timeout|undefined,
         }
     },
