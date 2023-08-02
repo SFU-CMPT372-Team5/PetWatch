@@ -24,11 +24,6 @@ export default {
             required: true
         },
         petID: String
-    },
-    methods: {
-        openChat() {
-
-        }
     }
 }
 </script>
