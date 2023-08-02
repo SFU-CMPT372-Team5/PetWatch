@@ -26,7 +26,7 @@
                 </VCardActions>
                 <VContainer fluid class="chatContainer" ref="chatContainer">
                     <VCard color="teal" variant="flat">
-                        <VCardTitle>Set pet's location</VCardTitle>
+                        <VCardTitle @click="sendLocation">Set pet's location</VCardTitle>
                     </VCard>
                     <GMapMap v-bind:style="{ height: computedHeight }" ref="map" :center="center" :zoom="15"
                         :disableDefaultUI="true" map-type-id="terrain"
