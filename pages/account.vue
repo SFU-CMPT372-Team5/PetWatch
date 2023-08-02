@@ -44,8 +44,9 @@
                                 <span class="text-h5 ml-3">Your Pets</span>
                             </VCardText>
                             <VCardActions class="mr-6" style="justify-content: end">
-                                <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
-                                    new Pet</VBtn>
+                                <NewPet/>
+                                <!-- <VBtn @click="navigateTo('/pets/new')" variant="elevated" color="blue-darken-2">Create
+                                    new Pet</VBtn> -->
                             </VCardActions>
                         </VRow>
                         <VContainer fluid>
