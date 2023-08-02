@@ -5,7 +5,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   runtimeConfig: {
-    mongoUrl: process.env.MONGO_URL
+    mongoUrl: process.env.MONGO_URL,
+    public: {
+      googleKey: process.env.GOOGLE_KEY
+    }
   },
   
   // Add in the modules we are using
@@ -33,7 +36,7 @@ export default defineNuxtConfig({
 
   // Tell Nuxt to build Vuetify
   build: {
-    transpile: ["vuetify"]
+    transpile: ["vuetify", "@fawmi/vue-google-maps"]
   },
   
   nitro: {

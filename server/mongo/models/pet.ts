@@ -27,10 +27,13 @@ const schema = new mongoose.Schema({
     
     isMissing: {type: Boolean, required: true, default: false},
     missingDetails: { //Potentially defined if `isMissing` is true
-        lastSeen: { //Optional
-            location: String, //Address or map pin (coordinates)
+        lastSeen: [{ //Optional
+            location: {
+                lat: Number,
+                lng: Number
+            }, //Address or map pin (coordinates)
             time: Number //Unix Timestamp, Date::getTime() in node
-        }
+        }]
     },
 
     chats: [String]
