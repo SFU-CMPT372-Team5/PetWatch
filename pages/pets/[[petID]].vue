@@ -63,6 +63,7 @@
                           </VCardTitle>
   
                           <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails" />
+                          {{ petData }}
   
                           <VCardActions style="justify-content: right;">
                             <VBtn color="indigo-lighten-1" prepend-icon="mdi-pencil" text="Edit Details"
@@ -383,7 +384,9 @@ export default {
         })
 
         if (editRes.status == 200) {
-          this.petData!.imageURL = petImage.inEditUrl;
+          if (petImage.inEditUrl != undefined) {
+            this.petData!.imageURL = petImage.inEditUrl;
+          }
 
           for (const pair of editSubmit.entries()) {
             switch (pair[0]) {
