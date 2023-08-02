@@ -253,7 +253,11 @@ export default {
   components: { QrcodeVue, ChatCard, PetDetails },
   setup() {
     definePageMeta({
-      middleware: ["auth"]
+      middleware: ["auth"],
+      validate: (route) => {
+        //Don't load page if no petID provided
+        return typeof(route.params.petID) === "string" && route.params.petID.length > 0;
+      }
     })
 
     const route = useRoute();
