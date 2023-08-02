@@ -1,56 +1,55 @@
 <template>
-    <!-- https://vuetifyjs.com/en/components/sheets/ I normally just follow examples to see how to use these -->
-    
-    <VSheet rounded height="100%">
-        <!-- Fluid means "fill parent div horizontally as best as possible with snapping to only select dimensions" -->
-        <VContainer fluid style="display: flex; flex-direction: column; height: 100%;">
-            <!-- Chat feed -->
-            <VCard color="teal" variant="flat">
-                <VCardTitle>Chat with: {{ strangerName }}</VCardTitle>
-            </VCard>
-            <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
-                
-                <VContainer fluid class="chatContainer" ref="chatContainer">
-                    <!-- Cant be bothered with sockets for now -->
-                    <VBtn location="top center" position="absolute" style="max-width: fit-content;" @click="checkForNewMessages" :loading="checkNewMessageLoading||refreshing">Check for new messages</VBtn>
-                    <!-- <InfoMessage/> -->
+    <VContainer fluid style="display: flex; flex-direction: column; height: 100%;" class="pa-0">
+        <!-- Chat feed -->
+        <VCard color="teal" variant="flat" class="pb-3 pt-3" >
+            <VCardTitle>
+                <VBtn color="red-darken-3" class="mr-4" @click="$emit('close')">Close</VBtn>
+                Chat with: {{ strangerName }}
+            </VCardTitle>
+        </VCard>
+        <VSheet color="grey-lighten-2" rounded style="overflow-y: auto; flex-grow: 1; height: 100%;">
+            
+            <VContainer fluid class="chatContainer" ref="chatContainer">
+                <InfoMessage/>
 
-                    <template v-for="(message, index) in messages">
-                        <!-- Assume messages are in chronological order -->
-                        <TimeMessage v-if="timeDiffSignificant(message.timestamp, messages[index-1]?.timestamp ?? 0)"
-                            :timestamp="message.timestamp"
-                        />
+                <template v-for="(message, index) in messages">
+                    <!-- Assume messages are in chronological order -->
+                    <TimeMessage v-if="timeDiffSignificant(message.timestamp, messages[index-1]?.timestamp ?? 0)"
+                        :timestamp="message.timestamp"
+                    />
 
-                        <ChatMessage
-                            :message-content="message.text" 
-                            :author-is-local="message.fromLocalAuthor"
-                        /> <!-- The ':' in :message-content means "the following text is code, probably referencing a variable" -->
-                    </template>
-
-                </VContainer>
-            </VSheet>
-
-            <!-- Chat box -->
-            <VTextField 
-                placeholder="Send Message"
-                single-line
-                v-model="textBoxData"
-                @keydown.enter="submitTextBox"
-            >
-                <!-- v-model is how text entered in the text box is added to a variable in the data object below -->
-
-                <template v-slot:append-inner>
-                    <VFadeTransition>
-                        <VIcon 
-                            color="green-accent-4" 
-                            v-if="textBoxData.length > 0" 
-                            @click="submitTextBox"
-                        >mdi-send</VIcon>
-                    </VFadeTransition>
+                    <ChatMessage
+                        :message-content="message.text" 
+                        :author-is-local="message.fromLocalAuthor"
+                    /> <!-- The ':' in :message-content means "the following text is code, probably referencing a variable" -->
                 </template>
-            </VTextField>
-        </VContainer>
-    </VSheet>
+
+            </VContainer>
+        </VSheet>
+
+        <!-- Chat box -->
+        <VTextField 
+            placeholder="Send Message"
+            single-line
+            v-model="textBoxData"
+            @keydown.enter="submitTextBox"
+            hide-details
+            variant="outlined"
+            autofocus
+        >
+            <!-- v-model is how text entered in the text box is added to a variable in the data object below -->
+
+            <template v-slot:append-inner>
+                <VFadeTransition>
+                    <VIcon 
+                        color="green-accent-4" 
+                        v-if="textBoxData.length > 0" 
+                        @click="submitTextBox"
+                    >mdi-send</VIcon>
+                </VFadeTransition>
+            </template>
+        </VTextField>
+    </VContainer>
 </template>
 
 <script lang="ts">
@@ -60,7 +59,7 @@ import InfoMessage from "./chatComponents/InfoMessage.vue";
 import TimeMessage from "./chatComponents/TimeMessage.vue";
 import {TextMessagePayload} from "~/types/chat/messageTypes";
 
-const SIGNIFICANT_TIME_DIFFERENCE = 1000 * 60 * 30 //30 minutes;
+const SIGNIFICANT_TIME_DIFFERENCE = 1000 * 60 * 5 //5 minutes;
 
 export default {
     components: {ChatMessage, InfoMessage, TimeMessage},
@@ -71,7 +70,11 @@ export default {
             textBoxData: "",
 
             checkNewMessageLoading: false,
-            refreshing: false
+            refreshing: false,
+
+            updater: undefined as NodeJS.Timeout|undefined,
+
+            postingMessage: false //Semaphore hahaha
         }
     },
     props: {
@@ -92,20 +95,31 @@ export default {
         },
 
         async postMessage(messagePayload: TextMessagePayload) {
+            this.postingMessage = true;
             try {
-                const sendRes = await $fetch(`/api/pet/${this.petID}/chat/${this.chatID}/sendMessage`, {
+                const sendRes = await $fetch<MessageModel>(`/api/pet/${this.petID}/chat/${this.chatID}/sendMessage`, {
                     method: "post",
                     body: {
                         text: messagePayload.text
                     }
                 })
-    
-                if (sendRes) {
+
+                if (sendRes != undefined) {
+                    messagePayload.timestamp = sendRes.timeSent
                     this.messages.push(messagePayload);
                 }
             } catch(e) {
                 alert(e);
+            } finally {
+                this.postingMessage = false;
             }
+        },
+
+        timeOfLastReceivedMessage() {
+            if (this.messages.length > 0) {
+                return this.messages[this.messages.length - 1].timestamp;
+            }
+            return 0;
         },
 
         /**
@@ -119,11 +133,12 @@ export default {
         },
 
         async refreshMessages() {
+            if (this.postingMessage) return; //Solves the case where a new message is posted but not added to the array in time before this goes off
+
             this.refreshing = true;
             try {
-                const messages = await $fetch<MessageModel[]>(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/messages`)
+                const messages = await $fetch<MessageModel[]>(`/api/pet/${this.$route.params.petID}/chat/${this.chatID}/messagesAfter?t=${this.timeOfLastReceivedMessage()}`)
 
-                this.messages.length = 0;
                 messages.forEach(m => {
                     this.messages.push({
                         fromLocalAuthor: m.isOwnerMessage != this.isStranger,
@@ -133,7 +148,10 @@ export default {
                 })
                 this.refreshing = false;
             } catch(e) {
-                alert("error!");
+                if (e?.status == 401) { //Basically means chat was deleted
+                    clearInterval(this.updater)
+                    this.$emit("chatEnded");
+                }
             }
         },
         checkForNewMessages() {
@@ -149,10 +167,12 @@ export default {
     mounted() {
         this.refreshMessages();
 
-        //Polling while websockets are not ready
-        setInterval(() => {
+        this.updater = setInterval(() => {
             if (!this.refreshing) this.refreshMessages();
         }, 5000)
+    },
+    unmounted() {
+        clearInterval(this.updater);
     }
 }
 </script>

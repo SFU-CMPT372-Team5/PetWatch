@@ -1,5 +1,6 @@
-import { getToken } from "#auth";
-import { message, chat } from "../../../../../mongo/models";
+import { getToken } from '#auth'
+import MessageModel from '~/types/models/message';
+import { message, chat } from '~/server/mongo/models';
 
 export default defineEventHandler(async (event) => {
   const token = await getToken({ event }); //The { } are important!
@@ -30,28 +31,22 @@ export default defineEventHandler(async (event) => {
         timeSent: Date.now(),
         isOwnerMessage: hostChat.ownerID == token.sub,
       });
-
+            
       // If the message is not created successfully, set the response status to 500 (Internal Server Error).
       if (sentMessage == undefined) {
-        setResponseStatus(event, 500);
-
-        // Return an object with a 'status' property set to 500 to indicate the server error.
-        return { status: 500 };
+          setResponseStatus(event, 500)
+          return {status: 500};
       } else {
-        // Return the created message.
-        return sentMessage;
+          // Return the created message.
+          return sentMessage as MessageModel
       }
     } else {
-      setResponseStatus(event, 404);
-
-      // Return an object with a 'status' property set to 404 to indicate the chat entry is not found.
-      return { status: 404 };
+        setResponseStatus(event, 404)
+        return {status: 404};
     }
   }
 
   // If the user is not logged in, set the response status to 401 (Unauthorized).
   setResponseStatus(event, 401);
-
-  // Return an object with a 'status' property set to 401 to indicate the unauthorized status.
   return { status: 401 };
 });

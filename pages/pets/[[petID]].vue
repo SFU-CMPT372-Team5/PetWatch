@@ -140,12 +140,12 @@
             </VCol>
           </VRow>
         </VCard>
-        <VCard width="100%">
+        <VCard width="100%" color="red-lighten-4">
           <VCardTitle>
             <h2 class="text-center">Find your Pet</h2>
           </VCardTitle>
-          <VCardText>
-            <VRow style="width: 100%">
+          <VCardText><VContainer fluid>
+            <VRow style="width: 100%" justify="center" no-gutters>
               <VCol v-if="!petData.isMissing">
                 <VCard :max-width="$vuetify.display.mdAndUp ? '40%' : '100%'" location="center"
                   class="mb-10 bg-pink-lighten-5">
@@ -155,58 +155,20 @@
                   </VCardActions>
                 </VCard>
               </VCol>
-              <VCol v-else-if="center != undefined">
-                <h2 class="text-center">Chats</h2>
-                <VContainer>
-                  <VRow justify="center">
-                    <VCol :cols="chatCardCols" v-for="chat in chatData">
-                      <ChatCard :chatData="chat" :petID="(chat.petID as string)" />
-                    </VCol>
-                  </VRow>
-                  <VRow justify="center">
-                    <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
-                  </VRow>
-                </VContainer>
-                <VDivider></VDivider>
-                <VContainer>
-                  <VRow>
-                    <VCol cols="8">
-                      <GMapMap :center="center" :zoom="10" :disableDefaultUI="true" map-type-id="terrain"
-                        style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
-                          zoomControl: true,
-                          mapTypeControl: false,
-                          scaleControl: true,
-                          streetViewControl: false,
-                          rotateControl: true,
-                          fullscreenControl: true,
-                        }">
-                        <GMapMarker v-for="(marker, i) in markers" @click="openMarkerInfo(i)" :key="i"
-                          :position="marker.coords"
-                          :icon="{ url: '/images/pet-marker.png', scaledSize: { width: 40, height: 40 } }">
-                          <GMapInfoWindow :opened="openedMarkerKey === i">
-                            <p>{{ marker.timeFormatted }}</p>
-                          </GMapInfoWindow>
-                        </GMapMarker>
-                      </GMapMap>
-                    </VCol>
-                    <VCol cols="4">
-                      <h3>Location Pings</h3>
-                      <div style="height: 400px; overflow: auto;">
-                        <p v-if="markers.length == 0">Sorry, no pings yet.</p>
-                        <VContainer class="py-2" v-for="(marker, i) in markers">
-                          <VCard @mouseover="openMarkerInfo(i)" @click="center = (markers[i].coords as any)">
-                            <VCardTitle>{{ marker.timeFormatted }}</VCardTitle>
-                            <VCardSubtitle>{{ marker.name }}</VCardSubtitle>
-                          </VCard>
-                        </VContainer>
-                      </div>
-                    </VCol>
-                  </VRow>
-                </VContainer>
+              <template v-else>
+                <VCol cols="12">
+                  <PetProfileChats :petID="$route.params.petID as string"/>
+                </VCol>
 
-              </VCol>
-            </VRow>
+                <VCol cols="12">
+                  <PetProfileMap :petID="$route.params.petID as string"/>
+                </VCol>
+              </template>
+            </VRow></VContainer>
           </VCardText>
+          <VCardActions style="justify-content: center;" v-if="petData.isMissing">
+            <VBtn color="green-darken-2" variant="elevated" @click="setLost(false)">Mark Pet as Found</VBtn>
+          </VCardActions>
         </VCard>
       </template>
     </VFadeTransition>
@@ -216,15 +178,9 @@
 <script lang="ts">
 // Importing required modules and components
 import QrcodeVue from 'qrcode.vue'; // A QrcodeVue component for generating QR codes
-import UserModel from 'types/models/user'; // Type definition for UserModel
-import ChatCard from "~/components/petProfile/ChatCard.vue"; // Custom ChatCard component for displaying chat messages
+import type UserModel from 'types/models/user'; // Type definition for UserModel
+import type PetModel from 'types/models/pet';
 import PetDetails from "~/components/petProfile/PetDetails.vue"; // Custom PetDetails component for displaying pet details
-import type PetModel from "~/types/models/pet"; // Type definition for PetModel
-import type ChatModel from 'types/models/chat'; // Type definition for ChatModel
-
-// Importing runtime configuration and Google API key
-const config = useRuntimeConfig();
-const googleKey = config.public.googleKey; // The Google API key used for geocoding
 
 export default {
   computed: {
@@ -237,28 +193,18 @@ export default {
     cols() {
       return this.$vuetify.display.smAndDown ? [12, 12] : [7, 5];
     },
-
-    // Compute the number of columns to use for the chat card based on screen size
-    chatCardCols() {
-      if (this.$vuetify.display.lgAndUp) return 3;
-      if (this.$vuetify.display.md) return 4;
-      if (this.$vuetify.display.sm) return 6;
-      return 12;
-    }
   },
   data() {
     return {
-      // Data properties for the component
-      editing: false, // Flag to indicate if the user is in editing mode
-      // center: { lat: 49.18915852522481, lng: -122.85014097753391 },
-      // markers: [] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[],
-      openedMarkerKey: null as number | null, // Key of the currently opened marker info window
+      editing: false,// Flag to indicate if the user is in editing mode
+
+      showConfirmationDialog: false,
 
       submitting: false, // Loading spinner for save changes
       submitError: false, // Flag to indicate if there was an error during form submission
     }
   },
-  components: { QrcodeVue, ChatCard, PetDetails }, // Registering the imported components
+  components: { QrcodeVue, PetDetails }, // Registering the imported components
   setup() {
     // Setup function that runs during component initialization
 
@@ -273,16 +219,12 @@ export default {
 
     // Initialize reactive variables using Vue's composition API
     const route = useRoute();
+
     let userData = ref(undefined as UserModel | undefined); // User data object
     let petData = ref(undefined as PetModel | undefined); // Pet data object
-    let chatData = ref(undefined as ChatModel[] | undefined); // Array of chat messages
 
-    let userPending = ref(true); // Flag to indicate if user data is still being fetched
-    let petPending = ref(true); // Flag to indicate if pet data is still being fetched
-    let chatPending = ref(true); // Flag to indicate if chat data is still being fetched
-
-    let markers = ref([] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[]); // Array of markers for pet's last seen locations
-    let center = ref({ lat: 49.18915852522481, lng: -122.85014097753391 }); // Center coordinates for the map
+    let userPending = ref(true); //Is data still being fetched?
+    let petPending = ref(true);
 
     // Fetch user data from the server
     $fetch<UserModel>(`/api/account/info`)
@@ -295,47 +237,6 @@ export default {
     $fetch<PetModel>(`/api/pet/${route.params.petID}`)
       .then(async (petRes) => {
         petData.value = petRes;
-
-        // If the pet is missing, fetch chat messages and update marker data
-        if (petRes.isMissing) {
-          $fetch<ChatModel[]>(`/api/pet/${route.params.petID}/chats`)
-            .then((chatRes) => {
-              chatData.value = chatRes;
-            })
-            .finally(() => chatPending.value = false);
-
-          // Fetch geolocation information for each last seen location and prepare markers
-          if (petRes.missingDetails?.lastSeen) {
-            if (petRes.missingDetails.lastSeen.length > 0) {
-              for (let i = 0; i < petRes.missingDetails.lastSeen.length; i++) {
-                const marker = petRes.missingDetails.lastSeen[i];
-                const res: any = await $fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker.location.lat},${marker.location.lng}&key=${googleKey}`)
-                  .catch((e) => {
-                    console.error(e);
-                  });
-                const time = new Date(petRes.missingDetails.lastSeen[i].time as number);
-
-                // Find the appropriate address format in the geocoding result
-                var format = 5; // results[5] is the 6th format, which includes up to postal code
-                while (!res.results[format]) { // Depending on the location, the format may not be available
-                  format--;
-                }
-
-                // Push the marker details into the markers array
-                markers.value.push({
-                  name: res.results[format].formatted_address,
-                  coords: petRes.missingDetails.lastSeen[i].location,
-                  time: petRes.missingDetails.lastSeen[i].time,
-                  timeFormatted: time.toLocaleDateString("en-US", { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })
-                });
-              }
-
-              // Sort the markers based on time in descending order
-              markers.value = markers.value.sort((a, b) => (b.time as number) - (a.time as number));
-              center.value = markers.value[0].coords as any; // Set the center to the latest location
-            }
-          }
-        }
       })
       .finally(() => petPending.value = false);
 
@@ -345,7 +246,7 @@ export default {
     });
 
     // Return the reactive variables that can be accessed in the template
-    return { userData, petData, chatData, userPending, petPending, chatPending, center, markers };
+    return { userData, petData, userPending, petPending };
   },
   methods: {
     // Component methods
@@ -502,17 +403,9 @@ export default {
 
       // If the request is successful (status code 200), update the component's data with the new value
       if ((lostRes as any).status == 200) {
-        console.log("updated");
-        this.petData!.isMissing = newLostStatus;
-
-        // FIXME temporary, because chat enrollment isn't updated here (yet)
-        if (newLostStatus == true) location.reload();
+        console.log("updated")
+        this.petData!.isMissing = newLostStatus
       }
-    },
-
-    // Open the marker info window for a specific marker index
-    openMarkerInfo(i: number | null) {
-      this.openedMarkerKey = i;
     },
   }
 };

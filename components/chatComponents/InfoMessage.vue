@@ -1,11 +1,10 @@
 <template>
     <VCard 
         class="infoMessage"
-        color="orange-accent-3"
-        variant="elevated"
+        color="red-lighten-3"
         density="compact"
     >
-        <VCardText>Warning: This user isn't logged in to a PetWatch account.<br>Be careful sharing private information. Message history will not be saved.</VCardText>
+        <VCardText>Note: All chat messages are deleted when the pet is marked as found. <br>Please remember to not share confidential information</VCardText>
     </VCard>
 </template>
 

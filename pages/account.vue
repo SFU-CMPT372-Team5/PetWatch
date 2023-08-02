@@ -81,6 +81,8 @@ import type UserModel from "types/models/user"; // Type definition for UserModel
 import type PetModel from "types/models/pet"; // Type definition for PetModel
 import ContactDetails from '~/components/petProfile/ContactDetails.vue'; // Custom ContactDetails component
 
+import axios from 'axios';
+
 export default {
     components: { ContactDetails }, // Registering the ContactDetails component
     data() {
@@ -89,7 +91,10 @@ export default {
             drawer: false, // Control the visibility of the side drawer
             isEditing: false, // Flag to indicate if the user is in editing mode
             submittingAccountUpdate: false, // Loading spinner for account update submission
-            accountUpdateError: false // Flag to indicate if there was an error during account update
+            accountUpdateError: false, // Flag to indicate if there was an error during account update
+
+            subject: 'test',
+            message: 't',
         }
     },
     async setup() {
