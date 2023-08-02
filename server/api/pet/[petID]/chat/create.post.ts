@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
                 const petFoundName = petFoundDetails?.petDetails?.name
                 const msg = {
                     to:  owenerDetails?.userDetails?.email, // Change to your recipient
-                    from: 'olivia0001002@gmail.com', // Change to your verified sender
+                    from: 'petwatchmanagement@gmail.com', // Change to your verified sender
                     subject: 'PetWatch Chat Initiated',
                     text: `${strangerName}  A pet finder would like to chat with you, please check your account for messages.`,
                     html: `<strong> Pet finder ${strangerName} would like to chat with you about pet: ${petFoundName}, please check your account for messages.</strong>`,

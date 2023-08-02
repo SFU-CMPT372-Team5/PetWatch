@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
             await user.findOneAndUpdate({ User_UID: token?.sub }, { userDetails: body.userDetails })
             const msg = {
                 to:  body.userDetails.email, // Change to your recipient
-                from: 'olivia0001002@gmail.com', // Change to your verified sender
+                from: 'petwatchmanagement@gmail.com', // Change to your verified sender
                 subject: 'PetWatch Account Updated',
                 text: 'Your PetWatch Account Details were recently edited, Please ensure this was correct.',
                 html: '<strong>Hello! Your PetWatch Account Details were recently edited, Please ensure this was correct.</strong>',
