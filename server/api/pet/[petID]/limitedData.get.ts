@@ -1,36 +1,45 @@
-import {pet} from "../../../mongo/models"
+import { pet } from "../../../mongo/models";
 
 export default defineEventHandler(async (event) => {
-    const petRes = await pet.findOne({
-        "Pet_UID": event.context.params.petID,
-    }, {
-        "_id": 1,
-        "petDetails.name": 1,
-        "isMissing": 1,
-        "imageURL": 1
-    });
-
-    if (petRes != null) {
-        if (petRes.isMissing) {
-            //Return more data
-            const missingPetRes = await pet.findById(petRes._id, {
-                "_id": 0,
-                "chats": 0
-            })
-
-            if (missingPetRes == undefined) {
-                setResponseStatus(event, 500);
-                return {status: 500};
-            } else {
-                return missingPetRes;
-            }
-        } else {
-            delete petRes["_id"];
-
-            return petRes;
-        } 
+  // Find a pet entry that matches the provided 'Pet_UID' (pet ID) and retrieve specific fields.
+  const petRes = await pet.findOne(
+    {
+      Pet_UID: event.context.params.petID,
+    },
+    {
+      _id: 1,
+      "petDetails.name": 1,
+      isMissing: 1,
+      imageURL: 1,
     }
+  );
 
-    setResponseStatus(event, 404);
-    return {status: 404};
-})    
+  // If a pet entry is found, continue processing
+  if (petRes != null) {
+    // Check if the pet is marked as missing
+    if (petRes.isMissing) {
+      // If the pet is missing, return more data (excluding 'chats' field) for missing pets.
+      const missingPetRes = await pet.findById(petRes._id, {
+        _id: 0,
+        chats: 0,
+      });
+
+      // If the additional data for missing pets is found, return it.
+      if (missingPetRes != undefined) {
+        return missingPetRes;
+      } else {
+        // If there is an error while retrieving additional data for missing pets, return 500 (Internal Server Error) status.
+        setResponseStatus(event, 500);
+        return { status: 500 };
+      }
+    } else {
+      // If the pet is not missing, remove the '_id' field and return the pet details.
+      delete petRes["_id"];
+      return petRes;
+    }
+  }
+
+  // If the pet entry is not found, return 404 (Not Found) status.
+  setResponseStatus(event, 404);
+  return { status: 404 };
+});

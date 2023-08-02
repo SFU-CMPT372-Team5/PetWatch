@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
     const token = await getToken({event});
     const body = await readBody(event);
 
+    // Validate request body
     if (body.userDetails == undefined) {
         setResponseStatus(event, 400);
         return {status: 400, message: "Invalid body syntax"}
