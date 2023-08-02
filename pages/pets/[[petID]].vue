@@ -182,6 +182,15 @@ import type UserModel from 'types/models/user'; // Type definition for UserModel
 import type PetModel from 'types/models/pet';
 import PetDetails from "~/components/petProfile/PetDetails.vue"; // Custom PetDetails component for displaying pet details
 
+// Define page meta information with middleware and validation for route parameters
+definePageMeta({
+  middleware: ["auth"], // Require authentication middleware for accessing this page
+  validate: (route) => {
+    // Don't load the page if no petID is provided
+    return typeof (route.params.petID) === "string" && route.params.petID.length > 0;
+  }
+});
+
 export default {
   computed: {
     // Compute the value for the QR code based on the current route's petID
@@ -207,15 +216,6 @@ export default {
   components: { QrcodeVue, PetDetails }, // Registering the imported components
   setup() {
     // Setup function that runs during component initialization
-
-    // Define page meta information with middleware and validation for route parameters
-    definePageMeta({
-      middleware: ["auth"], // Require authentication middleware for accessing this page
-      validate: (route) => {
-        // Don't load the page if no petID is provided
-        return typeof (route.params.petID) === "string" && route.params.petID.length > 0;
-      }
-    });
 
     // Initialize reactive variables using Vue's composition API
     const route = useRoute();
