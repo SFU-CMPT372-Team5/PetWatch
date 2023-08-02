@@ -1,7 +1,6 @@
 import { user, pet } from "../../../mongo/models"
-
 export default defineEventHandler(async (event) => {
-    const petRes = await pet.findOne({"Pet_UID": event.context.params.petID});
+    const petRes = await pet.findOne({"Pet_UID": event.context.params.petID, isMissing: { "$eq" : true }});
     const userRes = await user.findOne({"User_UID": petRes?.petOwnerID})
     if (userRes != null) {
         return userRes.userDetails

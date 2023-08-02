@@ -153,7 +153,7 @@
                     </VCardActions>
                   </VCard>
                 </VCol>
-                <VCol v-else>
+                <VCol v-else-if="center != undefined">
                   <h2 class="text-center">Chats</h2>
                   <VContainer>
                     <VRow justify="center">
@@ -165,6 +165,42 @@
                       <VBtn color="green-darken-2" @click="setLost(false)">Mark Pet as Found</VBtn>
                     </VRow>
                   </VContainer>
+                  <VDivider></VDivider>
+                  <VContainer>
+                    <VRow>
+                      <VCol cols="8">
+                        <GMapMap :center="center" :zoom="10"
+                          :disableDefaultUI="true" map-type-id="terrain"
+                          style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
+                            zoomControl: true,
+                            mapTypeControl: false,
+                            scaleControl: true,
+                            streetViewControl: false,
+                            rotateControl: true,
+                            fullscreenControl: true,
+                          }">
+                          <GMapMarker v-for="(marker, i) in markers" @click="openMarkerInfo(i)" :key="i" :position="marker.coords" :icon="{ url: '/images/pet-marker.png', scaledSize: { width: 40, height: 40 } }">
+                            <GMapInfoWindow :opened="openedMarkerKey === i">
+                              <p>{{ marker.timeFormatted }}</p>
+                            </GMapInfoWindow>
+                          </GMapMarker>
+                        </GMapMap>
+                      </VCol>
+                      <VCol cols="4" >
+                        <h3>Location Pings</h3>
+                        <div style="height: 400px; overflow: auto;">
+                          <p v-if="markers.length == 0">Sorry, no pings yet.</p>
+                          <VContainer class="py-2" v-for="(marker, i) in markers" >
+                              <VCard @mouseover="openMarkerInfo(i)" @click="center = (markers[i].coords as any)">
+                                <VCardTitle>{{ marker.timeFormatted }}</VCardTitle>
+                                <VCardSubtitle>{{ marker.name }}</VCardSubtitle>
+                              </VCard>
+                          </VContainer>
+                        </div>
+                      </VCol>
+                    </VRow>
+                  </VContainer>
+
                 </VCol>
               </VRow>
             </VCardText>
@@ -182,8 +218,12 @@ import ChatCard from "~/components/petProfile/ChatCard.vue";
 import PetDetails from "~/components/petProfile/PetDetails.vue"
 import type PetModel from "~/types/models/pet";
 import type ChatModel from 'types/models/chat'
+import { user } from 'server/mongo/models';
 
 const PLACEHOLDER_IMAGE_URL = "/images/paw.jpg";
+
+const config = useRuntimeConfig()
+const googleKey = config.public.googleKey
 
 export default {
   computed: {
@@ -220,6 +260,11 @@ export default {
   data() {
     return {
       editing: false,
+
+      // center: { lat: 49.18915852522481, lng: -122.85014097753391 },
+      // markers: [] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[],
+      openedMarkerKey: null as number | null,
+
       showConfirmationDialog: false,
 
       submitting: false, //Loading spinner for save changes
@@ -228,6 +273,7 @@ export default {
       isUploadingNewImage: false, //Loading spinner for uploading a file
       uploadedImageData: undefined as File | undefined,
       inEditImageURL: undefined as undefined | string,
+
     }
   },
   components: { QrcodeVue, ChatCard, PetDetails },
@@ -245,6 +291,10 @@ export default {
     let userPending = ref(true);
     let petPending = ref(true);
     let chatPending = ref(true);
+
+    let markers = ref([] as { name: any; coords: { lat: Number; lng: Number; }; time: Number; timeFormatted: string; }[])
+    let center = ref({ lat: 49.18915852522481, lng: -122.85014097753391 })
+
     $fetch<UserModel>(`/api/account/info`)
       .then((userRes) => {
         userData.value = userRes;
@@ -252,7 +302,7 @@ export default {
       .finally(() => userPending.value = false);
 
     $fetch<PetModel>(`/api/pet/${route.params.petID}`)
-      .then((petRes) => {
+      .then(async (petRes) => {
         petData.value = petRes;
 
         if (petRes.isMissing) {
@@ -261,6 +311,33 @@ export default {
               chatData.value = chatRes;
             })
             .finally(() => chatPending.value = false);
+            if (petRes.missingDetails?.lastSeen) {
+              if (petRes.missingDetails.lastSeen.length > 0) {
+                for (let i = 0; i < petRes.missingDetails.lastSeen.length; i++) {
+                  const marker = petRes.missingDetails.lastSeen[i]
+                  const res: any = await $fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${marker.location.lat},${marker.location.lng}&key=${googleKey}`)
+                  .catch((e) => {
+                    console.error(e)
+                  })
+                  const time = new Date(petRes.missingDetails.lastSeen[i].time as number)
+
+                  var format = 5 // results[5] is 6th format, includes up to postal code
+                  while (!res.results[format]) { //depending on location, format may not be available
+                    format--
+                  }
+
+                  markers.value.push({
+                    name: res.results[format].formatted_address,
+                    coords: petRes.missingDetails.lastSeen[i].location,
+                    time: petRes.missingDetails.lastSeen[i].time,
+                    timeFormatted: time.toLocaleDateString("en-US",{ month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+                  })
+                }
+                markers.value = markers.value.sort((a, b) => (b.time as number) - (a.time as number))
+                center.value = markers.value[0].coords as any
+            }
+            }
+
         }
       })
       .finally(() => petPending.value = false);
@@ -269,7 +346,7 @@ export default {
       title: `${petData.value != undefined ? `${petData.value.petDetails.name}'s Pet Profile` : 'Pet Profile'} | PetWatch`
     })
 
-    return { userData, petData, chatData, userPending, petPending, chatPending };
+    return { userData, petData, chatData, userPending, petPending, chatPending, center, markers };
   },
   methods: {
     downloadQr() {
@@ -415,6 +492,10 @@ export default {
         // FIXME temporary, because chat enrollment isn't updated here (yet)
         if (newLostStatus == true) location.reload();
       }
+    },
+
+    openMarkerInfo(i: number | null) {
+      this.openedMarkerKey = i
     },
   }
 };
