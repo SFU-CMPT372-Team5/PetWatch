@@ -66,9 +66,7 @@
                           <VCardTitle>
                             <h3 class=text-center>Pet Details</h3>
                           </VCardTitle>
-
                           <PetDetails :editing="editing" ref="petDetails" :data="petData.petDetails" />
-
                           <VCardActions style="justify-content: right;">
                             <VBtn color="indigo-lighten-1" prepend-icon="mdi-pencil" text="Edit Details"
                               variant="elevated" @click="startEdit()" v-if="!editing">
@@ -421,7 +419,9 @@ export default {
 
         // If the request is successful (status code 200), update the component's data with the new values
         if (editRes.status == 200) {
-          this.petData!.imageURL = petImage.inEditUrl;
+          if (petImage.inEditUrl != undefined) {
+            this.petData!.imageURL = petImage.inEditUrl;
+          }
 
           for (const pair of editSubmit.entries()) {
             switch (pair[0]) {
