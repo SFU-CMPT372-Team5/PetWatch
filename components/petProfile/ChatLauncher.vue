@@ -1,7 +1,9 @@
 <template>
     <v-dialog
         v-model="dialog"
-        fullscreen
+        :height="$vuetify.display.smAndDown ? undefined : '90%'"
+        :width="$vuetify.display.smAndDown ? undefined : '75%'"
+        :fullscreen="$vuetify.display.smAndDown"
     >
         <template v-slot:activator="{ props }">
             <v-btn
@@ -13,11 +15,8 @@
             </v-btn>
         </template>
         
-        <VCard>
-            <VCardActions>
-                <VBtn color="red-darken-2" variant="elevated" @click="() => dialog=false">Close Chat</VBtn>
-            </VCardActions>
-            <Chat :chatID="chatUID" :petID="petID" strangerName="Finder" :isStranger="false"/>
+        <VCard class="fill-height" density="compact">
+            <Chat :chatID="chatUID" :petID="petID" strangerName="Finder" :isStranger="false" @close="closeChat()"/>
         </VCard>
     </v-dialog>
 </template>
@@ -35,25 +34,25 @@ export default {
     data () {
         return {
             dialog: false,
-            loadChat: false,
             chatUID: undefined as string|undefined
         }
     },
     methods: {
         async openChat() {
-            this.loadChat = true;
             try {
-                const chatRes = await $fetch<ChatModel>(`/api/pet/${this.petID}/chat/${this.chatID}/get`, {
-                    method: "post"
-                })
+                const chatRes = await $fetch<ChatModel>(`/api/pet/${this.petID}/chat/${this.chatID}/get`)
 
                 this.dialog = true;
                 this.chatUID = chatRes.Chat_UID;
             } catch(e) {
-                alert("error")
-                this.loadChat = false;
                 return;
             }
+        },
+        closeChat() {
+            this.dialog = false;
+        },
+        chatEnded() {
+            this.dialog = false;
         }
     }
 }

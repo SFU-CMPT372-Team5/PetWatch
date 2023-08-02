@@ -1,6 +1,6 @@
 import { pet } from "../../../mongo/models";
 import { getToken } from '#auth';
-import {purgeChatForPet} from "~/utils/db/chat"
+import {purgeChatForPet, purgeLocationPointsForPet} from "~/server/utils/petDelete";
 
 export default defineEventHandler(async (event) => {
     const token = await getToken({event});
@@ -37,7 +37,8 @@ export default defineEventHandler(async (event) => {
       console.log("pet lost status updated");
       if (!updatedPet.isMissing) {
         //Delete all chat messages for this pet
-        purgeChatForPet(updatedPet.Pet_UID)
+        purgeChatForPet(updatedPet.Pet_UID);
+        purgeLocationPointsForPet(updatedPet.Pet_UID);
       }
 
 

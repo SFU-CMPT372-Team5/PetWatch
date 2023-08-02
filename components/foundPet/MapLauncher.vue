@@ -98,8 +98,7 @@ export default {
             await $fetch(`/api/pet/${this.petID}/location`, {
                 method: 'PUT',
                 body: {
-                    location: this.markerPosition,
-                    time: Date.now()
+                    location: this.markerPosition
                 }
             }).then((res) => {
                 this.sent = true

@@ -1,11 +1,11 @@
 <template>
-    <v-sheet elevation="12" width="100vw" class="pa-4 text-center mx-auto fill-height" :color="(!petPending && !found) || petData?.isMissing ? 'red-accent-1' : 'blue-accent-1'" style="transition: background-color 1s linear;">
+    <v-sheet elevation="12" width="100vw" class="pa-4 text-center mx-auto fill-height" :color="(!petPending && petData == undefined) || petData?.isMissing ? 'red-accent-1' : 'blue-accent-1'" style="transition: background-color 1s linear;">
         <VFadeTransition group>
             <!-- Loading -->
             <SharedPageLoading v-if="petPending"/>
             
             <!-- Loaded w/out data -->
-            <VRow v-else-if="!found" class="fill-height" justify="center" align="center">
+            <VRow v-else-if="petData == undefined" class="fill-height" justify="center" align="center">
                 <VCol :cols="cardWidthCols">
                     <VCard>
                     <v-icon class="mb-5" color="error" icon="mdi-close-circle-outline" size="112"></v-icon>
@@ -63,7 +63,13 @@
                                     <VCard height="100%">
                                         <VCardTitle><h3 class=text-center>Owner Contact Details</h3></VCardTitle>
                                         <VCardText>
-                                            <ContactDetails :data="contactData"/>
+                                            <VRow v-if="!loggedIn" justify="center">
+                                                <VCard class="ma-2 pa-5" color="error" variant="tonal">
+                                                    <VIcon size="xxx-large">mdi-close-circle-outline</VIcon><br/>
+                                                    Login to see contact details
+                                                </VCard>
+                                            </VRow>
+                                            <ContactDetails v-else :data="contactData"/>
                                         </VCardText>
                                     </VCard>
                                     </VCol>
@@ -75,11 +81,11 @@
                                 <VCardTitle>Contact {{ ownerName }}</VCardTitle>
                                 <VCardText>
                                     <VRow justify="center">
-                                        <VCol cols="6">
+                                        <VCol cols="12" sm="6">
                                             <ChatLauncher :loggedIn="loggedIn" :ownerName="ownerName"/>
                                         </VCol>
-                                        <VCol cols="6">
-                                            <MapLauncher :petID="$route.params.petID"/>
+                                        <VCol cols="12" sm="6">
+                                            <MapLauncher :petID="($route.params.petID as string)"/>
                                         </VCol>
                                     </VRow>
                                 </VCardText>
@@ -108,44 +114,14 @@
     </v-sheet>
 </template>
 
-<script setup lang="ts">
-const route = useRoute();
-
-const {data: petData, pending: petPending, error: petError} = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
-const {data: contactData, error: contactError} = await useLazyFetch<UserDetails>(`/api/pet/${route.params.petID}/ownerDetails`);
-
-const session = await getSession();
-
-let found = false;
-const loggedIn = session.user != undefined;
-
-watch(petPending, async (dataVal) => {
-    if (dataVal == true) return;
-
-    if (petError.value != undefined) return;
-    found = true;
-
-    const {data: amOwner, error} = await useFetch<{owner: boolean}>(`/api/pet/${route.params.petID}/amOwner`)
-
-    if (amOwner.value?.owner) {
-        useRouter().push(`/pets/${route.params.petID}`);
-        return;
-    }
-})
-
-useHead({
-    title: `Found ${petData.value != undefined ? `${petData.value.petDetails.name}` : 'Found Pet'} | PetWatch`
-})
-
+<script lang="ts">
 definePageMeta({
     validate: (route) => {
         //Don't load page if petID not provided
         return typeof(route.params.petID) === "string" && route.params.petID.length > 0;
     }
 })
-</script>
 
-<script lang="ts">
 import PetDetails from "~/components/petProfile/PetDetails.vue"
 import ContactDetails from "~/components/petProfile/ContactDetails.vue";
 import type PetModel from "~/types/models/pet"
@@ -158,6 +134,35 @@ const { getSession} = useAuth();
 
 export default {
     components: {PetDetails, ContactDetails, ChatLauncher, MapLauncher},
+    async setup() {
+        const route = useRoute();
+
+        const {data: petData, pending: petPending, error: petError} = await useLazyFetch<LimitedPetModel|PetModel>(`/api/pet/${route.params.petID}/limitedData`);
+        const {data: contactData, error: contactError} = await useLazyFetch<UserDetails>(`/api/pet/${route.params.petID}/ownerDetails`);
+
+        const session = await getSession();
+
+        const loggedIn = session.user != undefined;
+
+        watch(petPending, async (dataVal) => {
+            if (dataVal == true) return;
+
+            if (petError.value != undefined) return;
+
+            const {data: amOwner, error} = await useFetch<{owner: boolean}>(`/api/pet/${route.params.petID}/amOwner`)
+
+            if (amOwner.value?.owner) {
+                useRouter().push(`/pets/${route.params.petID}`);
+                return;
+            }
+        })
+
+        useHead({
+            title: `Found ${petData.value != undefined ? `${petData.value.petDetails.name}` : 'Found Pet'} | PetWatch`
+        })
+
+        return {loggedIn, petData, petPending, contactData, contactError}
+    },
     computed: {
         colWidths() {
             return this.$vuetify.display.smAndDown ? [12, 12] : [5, 7]
@@ -169,9 +174,7 @@ export default {
             return 12;
         },
         ownerName() {
-            return "The Pet's Owner"
-
-            return (petData?.value as PetModel)?.contactDetails.name ?? "The Pet's Owner"
+            return this.contactData?.name ?? "The Pet's Owner"
         }
     },
 }

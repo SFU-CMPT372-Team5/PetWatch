@@ -8,6 +8,15 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 400);
         return { status: 400, body: { error: "Bad Request" } };
     }
+
+    //Validate body
+    if (
+        (typeof(body.location?.lat) != "number" || typeof(body.location?.lng) != "number")
+    ) {
+        console.error("Location body illegal")
+        setResponseStatus(event, 400);
+        return { status: 400, body: { error: "Bad Request" } };
+    }
     try {
         const locatedPet = await pet.findOneAndUpdate(
             { 
@@ -17,7 +26,7 @@ export default defineEventHandler(async (event) => {
             {
                     $push: { 'missingDetails.lastSeen': {
                         location: body.location,
-                        time: body.time
+                        time: Date.now()
                     }}
             },
             { new: true}
