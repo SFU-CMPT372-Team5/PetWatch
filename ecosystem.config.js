@@ -5,7 +5,7 @@ module.exports = {
             name: "PetWatch",
             port: "10002",
             script: "npm",
-            args: "preview"
+            args: "run preview"
         }
     ]
 }
