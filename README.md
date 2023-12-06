@@ -12,4 +12,4 @@ Compared to a conventional solution, PetWatch allows owners to change vital info
 
 The application was developed using Nuxt3+Vue3, with authentication services provided by Auth0, map services by Google, email services by SendGrid, image storage by GCP Bucket Storage, and database services by MongoDb Atlas. The project was initially hosted via GCP to satisfy course requirements, but has since been migrated to Azure.
 
-At this time the project is finished and no more additions are being accepted. Although complete, this project should not be considered production-ready and is kept online for demonstration purposes only.
+At this time the project is finished and no more additions are being accepted. Although complete, this project should not be considered production-ready and is kept online for demonstration purposes only. The live demo can be found [here](https://petwatch.website)
