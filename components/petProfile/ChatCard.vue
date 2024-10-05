@@ -23,10 +23,10 @@
 </template>
 
 <script lang="ts">
-import ChatModel from 'types/models/chat';
+import ChatModel from '~/types/models/chat';
 import type { PropType } from 'vue';
 import ChatLauncher from './ChatLauncher.vue'
-import { UserDetails } from 'types/models/user';
+import { UserDetails } from '~/types/models/user';
 
 export default {
     components: {ChatLauncher},

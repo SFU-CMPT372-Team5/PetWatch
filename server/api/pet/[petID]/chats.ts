@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const chats = await chat.find(
       {
         ownerID: token.sub,
-        petID: event.context.params.petID,
+        petID: event.context.params?.petID,
       },
       { _id: 0 }
     );

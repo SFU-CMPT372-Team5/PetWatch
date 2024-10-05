@@ -9,18 +9,19 @@
     "createPm2": "pm2 start npm --name 'PetWatch' -- run preview"
   },
   "devDependencies": {
+    "@azure/storage-blob": "^12.25.0",
     "@nuxt/devtools": "latest",
     "@types/luxon": "^3.3.0",
     "@types/node": "^18",
-    "nuxt": "^3.6.2"
+    "nuxt": "^3.13.2",
+    "vue-tsc": "^2.1.6"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
     "@fawmi/vue-google-maps": "0.9.67",
-    "@google-cloud/storage": "^6.12.0",
     "@mdi/font": "^7.2.96",
     "@sendgrid/mail": "^7.7.0",
-    "@sidebase/nuxt-auth": "^0.6.0-beta.3",
+    "@sidebase/nuxt-auth": "^0.9.3",
     "luxon": "^3.3.0",
     "mongoose": "^7.3.2",
     "nuxt-socket-io": "^3.0.12",

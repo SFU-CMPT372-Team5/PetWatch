@@ -18,13 +18,15 @@
                 color="green-darken-1"
             />
         </VFadeTransition>
-        <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" accept="image/*" />
+        <input ref="imgUploader" class="d-none" type="file" @change="handleImageChange" :accept="validMimeTypes" />
     </VImg>
 </template>
 
 <script lang="ts">
 import { LimitedPetModel } from "~/types/models/pet";
 import {type PropType} from "vue"
+
+import { validMimeToFileExt } from "~/config.json"
 
 const DEFAULT_IMAGE = "/images/paw.jpg"
 
@@ -68,6 +70,9 @@ export default {
 
             return DEFAULT_IMAGE;
         },
+        validMimeTypes() {
+            return Object.keys(validMimeToFileExt).join(", ");
+        }
     },
     methods: {
         newImagePending() {

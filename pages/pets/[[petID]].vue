@@ -178,8 +178,8 @@
 <script lang="ts">
 // Importing required modules and components
 import QrcodeVue from 'qrcode.vue'; // A QrcodeVue component for generating QR codes
-import type UserModel from 'types/models/user'; // Type definition for UserModel
-import type PetModel from 'types/models/pet';
+import type UserModel from '~/types/models/user'; // Type definition for UserModel
+import type PetModel from '~/types/models/pet';
 import PetDetails from "~/components/petProfile/PetDetails.vue"; // Custom PetDetails component for displaying pet details
 
 // Define page meta information with middleware and validation for route parameters

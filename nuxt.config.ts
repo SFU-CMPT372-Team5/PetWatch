@@ -3,12 +3,26 @@ import config from "./config.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  compatibilityDate: '2024-09-25',
+
+  typescript: {
+    typeCheck: true,
+    strict: false
+  },
 
   runtimeConfig: {
-    mongoUrl: process.env.MONGO_URL,
-    public: {
-      googleKey: process.env.GOOGLE_KEY
-    }
+    mongoUrl: "",
+
+    auth0ClientId: "",
+    auth0ClientSecret: "",
+    auth0Issuer: "",
+    authSecret: "",
+    authOrigin: "",
+
+    azureBlobConnectionString: "",
+    azureBlobContainerName: "",
+
+    sendgridApiKey: "",
   },
   
   // Add in the modules we are using
@@ -24,6 +38,9 @@ export default defineNuxtConfig({
     provider: {
       defaultProvider: "auth0",
       type: "authjs"
+    },
+    sessionRefresh: {
+      enableOnWindowFocus : true,
     }
   },
 

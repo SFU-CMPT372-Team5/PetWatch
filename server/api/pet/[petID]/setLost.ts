@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     
     // Find the pet by ID and update the isMissing field to true
     const updatedPet = await pet.findOneAndUpdate(
-      { Pet_UID: event.context.params.petID, petOwnerID: token.sub },
+      { Pet_UID: event.context.params?.petID, petOwnerID: token.sub },
       { isMissing: status },
       { new: true }
     );

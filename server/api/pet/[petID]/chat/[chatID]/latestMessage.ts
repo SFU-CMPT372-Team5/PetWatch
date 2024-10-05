@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
     if (token?.sub != undefined) {
         const chatHost = await chat.findOne({
-            "Chat_UID": event.context.params.chatID,
+            "Chat_UID": event.context.params?.chatID,
             $or: [
                 {
                     ownerID: token.sub
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const messages = await message.find({
-            "chatID": event.context.params.chatID
+            "chatID": event.context.params?.chatID
         }, {"_id": 0}).sort({timeSent: -1}).limit(1);
 
         if (messages.length > 0) return messages[0] as MessageModel;

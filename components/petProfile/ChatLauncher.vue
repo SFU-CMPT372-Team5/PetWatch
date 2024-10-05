@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import Chat from "../Chat.vue"
-import ChatModel from "types/models/chat";
+import ChatModel from "~/types/models/chat";
 
 export default {
     components: {Chat},

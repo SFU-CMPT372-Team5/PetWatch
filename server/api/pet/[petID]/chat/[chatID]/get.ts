@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (token?.sub != undefined) {
     // Find a chat entry that matches the provided 'chatID' and where the user is either the owner or the stranger.
     const chatHost = await chat.findOne({
-      Chat_UID: event.context.params.chatID,
+      Chat_UID: event.context.params?.chatID,
       $or: [{ ownerID: token.sub }, { strangerID: token.sub }],
     });
 

@@ -1,4 +1,9 @@
 {
     "ssr": false,
-    "imageUploadMaxBytes": 10485760
+    "imageUploadMaxBytes": 10485760,
+    "validMimeToFileExt": {
+        "image/png": "png",
+        "image/jpeg": "jpg",
+        "image/gif": "gif"
+    }
 }

@@ -4,7 +4,8 @@ import { getToken } from '#auth'
 //const sgMail = require('@sendgrid/mail')
 import sgMail from '@sendgrid/mail'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY1!);
+const config = useRuntimeConfig();
+sgMail.setApiKey(config.sendgridApiKey);
 
 
 export default defineEventHandler(async (event) => {

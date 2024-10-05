@@ -14,7 +14,7 @@ export default defineEventHandler(async event => {
     //Get chat details provided querying user is part of chat
     try {
         const chatRes = await chat.findOne({
-            Chat_UID: event.context.params.chatID,
+            Chat_UID: event.context.params?.chatID,
             $or: [
                 {
                     ownerID: token.sub
@@ -38,7 +38,8 @@ export default defineEventHandler(async event => {
 
         return {
             ownerDetails: owner?.userDetails as UserDetails|undefined,
-            strangerDetails: stranger?.userDetails as UserDetails|undefined
+            strangerDetails: stranger?.userDetails as UserDetails|undefined,
+            status: 200
         };
     } catch(e) {}
 

@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import ChatModel from 'types/models/chat';
+import ChatModel from '~/types/models/chat';
 export default {
     props: {
         petID: {

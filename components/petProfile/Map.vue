@@ -2,7 +2,7 @@
     <VContainer>
         <VRow>
             <VCol cols="12" lg="8">
-            <GMapMap :center="center" :zoom="10"
+            <!-- <GMapMap :center="center" :zoom="10"
                 :disableDefaultUI="true" map-type-id="terrain"
                 style="width: auto; height: 400px; margin: auto; border-radius: 10px;" :options="{
                 zoomControl: true,
@@ -17,7 +17,10 @@
                     <p>{{ marker.timeFormatted }}</p>
                 </GMapInfoWindow>
                 </GMapMarker>
-            </GMapMap>
+            </GMapMap> -->
+            <VCard height="300px" class="align-center d-flex justify-center" color="grey-lighten-3">
+                <p class="text-center text-subtitle-1">Google Maps credits expired. Not renewing because that costs money</p>
+            </VCard>
             </VCol>
             <VCol >
             <h3>Location Pings</h3>
@@ -35,7 +38,7 @@
     </VContainer>
 </template>
 <script lang="ts">
-import {LocationPoint} from 'types/models/pet';
+import {LocationPoint} from '~/types/models/pet';
 
 // Importing runtime configuration and Google API key
 const config = useRuntimeConfig();
@@ -108,15 +111,15 @@ export default {
             }
         }
     },
-    async mounted() {
-        this.updater = setInterval(() => {
-            this.updateLocationMarks()
-        }, 15000)
+    // async mounted() {
+    //     // this.updater = setInterval(() => {
+    //     //     this.updateLocationMarks()
+    //     // }, 15000)
 
-        this.updateLocationMarks();
-    },
-    unmounted() {
-        clearInterval(this.updater);
-    }
+    //     // this.updateLocationMarks();
+    // },
+    // unmounted() {
+    //     clearInterval(this.updater);
+    // }
 }
 </script>

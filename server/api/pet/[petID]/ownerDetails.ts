@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Find the pet with the given petID in the request URL parameters.
-    const petRes = await pet.findOne({ Pet_UID: event.context.params.petID });
+    const petRes = await pet.findOne({ Pet_UID: event.context.params?.petID });
 
     // If the pet is not found, return 404 (Not Found) status.
     if (petRes == undefined) {
