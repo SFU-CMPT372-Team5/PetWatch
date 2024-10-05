@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (token?.sub != undefined) {
       // Find a chat entry that matches the provided 'chatID' and where the user is either the owner or the stranger.
       const chatHost = await chat.findOne({
-          "Chat_UID": event.context.params.chatID,
+          "Chat_UID": event.context.params?.chatID,
           $or: [
               {
                   ownerID: token.sub
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
       // Find all messages associated with the provided chat ID and sort them by the 'timeSent' property in ascending order (latest message last).
       const messages = await message.find({
-          "chatID": event.context.params.chatID
+          "chatID": event.context.params?.chatID
       }, {"_id": 0}).sort({timeSent: 1})
 
       return messages

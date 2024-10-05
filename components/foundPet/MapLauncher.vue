@@ -25,10 +25,10 @@
                     <h2>Share Location with Owner</h2>
                 </VCardActions>
                 <VContainer fluid class="chatContainer" ref="chatContainer">
-                    <VCard color="teal" variant="flat">
+                    <!-- <VCard color="teal" variant="flat">
                         <VCardTitle @click="sendLocation">Set pet's location</VCardTitle>
-                    </VCard>
-                    <GMapMap v-bind:style="{ height: computedHeight }" ref="map" :center="center" :zoom="15"
+                    </VCard> -->
+                    <!-- <GMapMap v-bind:style="{ height: computedHeight }" ref="map" :center="center" :zoom="15"
                         :disableDefaultUI="true" map-type-id="terrain"
                         style="width: auto; margin: auto; border-radius: 10px;" :options="{
                             zoomControl: true,
@@ -52,10 +52,12 @@
                             url: '/images/user-marker.png',
                             scaledSize: { width: 50, height: 50 },
                         }"> </GMapMarker>
-                    </GMapMap>
-
+                    </GMapMap> -->
+                    <VCard color="grey-lighten-3" class="d-flex align-center justify-center" height="300px">
+                        <p class="text-center text-subtitle-1">Google Maps credits expired. Not renewing because that costs money</p>
+                    </VCard>
                 </VContainer>
-                <VBtn color="green" @click="sendLocation">Send</VBtn>
+                <!-- <VBtn color="green" @click="sendLocation">Send</VBtn> -->
             </VCard>
         </v-dialog>
     </div>
@@ -83,10 +85,10 @@ export default {
     },
     methods: {
         async openMap() {
-            navigator.geolocation.getCurrentPosition(position => {
-                this.center.lat = position.coords.latitude
-                this.center.lng = position.coords.longitude
-            })
+            // navigator.geolocation.getCurrentPosition(position => {
+            //     this.center.lat = position.coords.latitude
+            //     this.center.lng = position.coords.longitude
+            // })
             this.dialog = true;
         },
         handleDrag(e) {

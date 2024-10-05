@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (token?.sub != undefined) {
     // Find a pet entry that matches the provided 'petID' and where the user is the owner
     const petRes = await pet.findOne({
-      Pet_UID: event.context.params.petID,
+      Pet_UID: event.context.params?.petID,
       petOwnerID: token.sub,
     });
 

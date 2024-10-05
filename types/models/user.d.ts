@@ -2,14 +2,14 @@ export default interface UserModel {
     User_UID: string, //Primary Key
     dateCreated: string,
     userDetails: {
-        name: str,
+        name: string,
         address: string,
         phone: string,
         email: string,
         additionalInfo: [ //Optional
             {
-                detailName: String,
-                detailValue: String
+                detailName?: string,
+                detailValue?: string
             }
         ]
     },
@@ -17,15 +17,4 @@ export default interface UserModel {
     nonOwnerPetChats: string[] //A list of chats this person is in for pets that are not their own
 }
 
-export interface UserDetails {
-    name: string,
-    address: string,
-    phone: string,
-    email: string,
-    additionalInfo: [ //Optional
-        {
-            detailName: String,
-            detailValue: String
-        }
-    ]
-}
+export type UserDetails = UserModel['userDetails']

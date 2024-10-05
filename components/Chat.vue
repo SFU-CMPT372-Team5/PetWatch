@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import MessageModel from "types/models/message";
+import MessageModel from "~/types/models/message";
 import ChatMessage from "./chatComponents/ChatMessage.vue";
 import InfoMessage from "./chatComponents/InfoMessage.vue";
 import TimeMessage from "./chatComponents/TimeMessage.vue";

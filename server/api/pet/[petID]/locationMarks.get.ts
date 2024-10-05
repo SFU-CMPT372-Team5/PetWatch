@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     if (token?.sub != undefined) {
         try {
             const petRes = await pet.findOne({
-                "Pet_UID": event.context.params.petID,
+                "Pet_UID": event.context.params?.petID,
                 "petOwnerID": token.sub,
                 "isMissing": true
             }, {"_id": 0, "missingDetails": 1})

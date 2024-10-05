@@ -1,4 +1,5 @@
 import { getToken } from "#auth";
+import CloudStorageManager from "~/server/utils/cloudStorage";
 import { pet } from "../../../mongo/models";
 
 export default defineEventHandler(async (event) => {
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
       // Secondly, if an image has been uploaded, delete the image
       const petImageUrl = existingPet.imageURL;
       if (petImageUrl != undefined) {
-        await getManagerInstance().delete(id, petImageUrl);
+        await CloudStorageManager.getInstance().delete(id, petImageUrl);
       }
 
       // Lastly, delete the pet entry from the database

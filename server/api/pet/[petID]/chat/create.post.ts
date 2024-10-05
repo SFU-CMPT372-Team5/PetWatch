@@ -3,16 +3,24 @@ import { chat, pet, user } from '../../../../mongo/models';
 
 import sgMail from '@sendgrid/mail'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY1!);
+const config = useRuntimeConfig();
+sgMail.setApiKey(config.sendgridApiKey);
 
 export default defineEventHandler(async (event) => {
     const token = await getToken({event}); //The { } are important!
+    const petId = event.context.params?.petID;
+
+    if (petId == undefined) {
+        console.log("petId is undefined");
+        setResponseStatus(event, 400);
+        return {status: 400};
+    }
 
     //Check if user logged in
     if (token?.sub != undefined) {
         // Find an existing chat entry that matches the provided 'petID' and where the user is the stranger.
         const existingChat = await chat.findOne({
-            petID: event.context.params.petID,
+            petID: petId,
             strangerID: token.sub,
         });
 
@@ -20,15 +28,15 @@ export default defineEventHandler(async (event) => {
         if (existingChat != null) return existingChat;
 
         const petOwner = await pet.findOne({
-            Pet_UID: event.context.params.petID
+            Pet_UID: petId
         });
 
         // If the pet owner is found and the pet is missing, create a new chat entry between the user and the pet owner.
         if (petOwner != undefined && petOwner.isMissing) { //Only create if pet missing
             // Create a new chat entry with a unique Chat_UID based on the 'petID' and the user's token.
             const newChat = await chat.create({
-                Chat_UID: `${event.context.params.petID}` + `${token.sub.replace("|", "")}`,
-                petID: event.context.params.petID,
+                Chat_UID: `${petId}` + `${token.sub.replace("|", "")}`,
+                petID: petId,
                 strangerID: token.sub,
                 ownerID: petOwner.petOwnerID
             });

@@ -1,8 +1,8 @@
 import { pet } from "../../../mongo/models";
 import { getToken } from "#auth";
-import {getManagerInstance} from "~/server/utils/cloudStorage"
+import CloudStorageManager from "~/server/utils/cloudStorage"
 import PetModel from "../../../../types/models/pet";
-import {imageUploadMaxBytes} from "~/config.json"
+import {imageUploadMaxBytes, validMimeToFileExt } from "~/config.json"
 
 
 export default defineEventHandler(async (event) => {
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
   if (formData == undefined) {
     setResponseStatus(event, 400);
-    return {"message": "Bad request"};
+    return {status: 400, message: "Bad request"};
   }
 
   //Let's start by attempting to find the pet, this way we know it exists before we potentially upload an image to GCP
@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
 
   if (!somethingAdded) {
     setResponseStatus(event, 400);
-    return {message: "No valid parameters to add"};
+    return {status: 400, message: "No valid parameters to add"};
   }
 
   //If we get here, we have a valid payload, so it's time to upload the potential image
@@ -76,26 +76,28 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 413);
       return {status: 413, message: "Image too big! Max size (bytes): " + imageUploadMaxBytes}
     }
-    
-    //Is an image-type file
-    const fileExt = imageEntry.filename?.split('.').pop();
-    if (fileExt == undefined) return;
 
-    const fileUploadRes = await getManagerInstance().upload(
+    const fileMime = imageEntry.type.toLowerCase();
+    if (validMimeToFileExt[fileMime as keyof typeof validMimeToFileExt] == undefined) {
+      //Invalid mime type
+      setResponseStatus(event, 415);
+      return;
+    }
+
+    const fileUploadRes = await CloudStorageManager.getInstance().upload(
       event.context.params!.petID, 
       imageEntry.data,
-      imageEntry.type,
-      fileExt
+      imageEntry.type as keyof typeof validMimeToFileExt,
     );
 
     //Attempt to delete the old image if the new image doesn't share the same file extension 
     //(prevents orphaning files, but ensures the image was replaced before deleting the old one)
-    if (fileUploadRes != undefined && existingImageUrl?.endsWith(fileExt) == false) {
-      await getManagerInstance().delete(event.context.params!.petID, existingImageUrl);
+    if (fileUploadRes != undefined && existingImageUrl?.endsWith(fileUploadRes.imageExt) == false) {
+      await CloudStorageManager.getInstance().delete(event.context.params!.petID, existingImageUrl);
     }
 
     //Do this regardless
-    resultImgURL = fileUploadRes;
+    resultImgURL = fileUploadRes?.url;
   }
 
   try {
