@@ -184,7 +184,7 @@ import PetDetails from "~/components/petProfile/PetDetails.vue"; // Custom PetDe
 
 // Define page meta information with middleware and validation for route parameters
 definePageMeta({
-  middleware: ["auth"], // Require authentication middleware for accessing this page
+  middleware: ["sidebase-auth"], // Require authentication middleware for accessing this page
   validate: (route) => {
     // Don't load the page if no petID is provided
     return typeof (route.params.petID) === "string" && route.params.petID.length > 0;

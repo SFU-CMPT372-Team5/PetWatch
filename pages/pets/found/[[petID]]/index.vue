@@ -130,7 +130,7 @@ import { type UserDetails } from "~/types/models/user"
 
 import ChatLauncher from "~/components/foundPet/ChatLauncher.vue"
 import MapLauncher from "~/components/foundPet/MapLauncher.vue"
-const { getSession} = useAuth();
+const { getSession, status } = useAuth();
 
 export default {
     components: {PetDetails, ContactDetails, ChatLauncher, MapLauncher},
@@ -142,7 +142,7 @@ export default {
 
         const session = await getSession();
 
-        const loggedIn = session.user != undefined;
+        const loggedIn = status.value === 'authenticated' && session != undefined;
 
         watch(petPending, async (dataVal) => {
             if (dataVal == true) return;

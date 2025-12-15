@@ -37,8 +37,8 @@ export default defineEventHandler(async event => {
         if (owner == undefined || stranger == undefined) throw Error(); //Cause that shouldn't happen
 
         return {
-            ownerDetails: owner?.userDetails as UserDetails|undefined,
-            strangerDetails: stranger?.userDetails as UserDetails|undefined,
+            ownerDetails: owner?.userDetails as unknown as UserDetails|undefined,
+            strangerDetails: stranger?.userDetails as unknown as UserDetails|undefined,
             status: 200
         };
     } catch(e) {}

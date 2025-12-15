@@ -10,21 +10,20 @@
   },
   "devDependencies": {
     "@azure/storage-blob": "^12.25.0",
-    "@nuxt/devtools": "latest",
     "@types/luxon": "^3.3.0",
-    "@types/node": "^18",
-    "nuxt": "^3.13.2",
+    "@types/node": "^22",
+    "nuxt": "^3.15.4",
     "vue-tsc": "^2.1.6"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
     "@fawmi/vue-google-maps": "0.9.67",
     "@mdi/font": "^7.2.96",
-    "@sendgrid/mail": "^7.7.0",
-    "@sidebase/nuxt-auth": "^0.9.3",
+    "@sendgrid/mail": "^8.1.6",
+    "@sidebase/nuxt-auth": "^1.1.1",
     "luxon": "^3.3.0",
-    "mongoose": "^7.3.2",
-    "nuxt-socket-io": "^3.0.12",
+    "mongoose": "^8.0.0",
+    "nuxt-socket-io": "3.0.10",
     "qrcode.vue": "^3.4.0",
     "vuetify": "^3.3.7"
   }

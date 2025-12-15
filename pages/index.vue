@@ -256,23 +256,8 @@ export default {
         signOut() {
             return signOut();
         },
-        submitQuestions() {       
-            emailjs.init('qM5O9B4X9jYSRNguq');
-            
-            emailjs.send(
-                'service_6pc0hhb',
-                'template_r2dq36s',
-                {
-                    from_name: `${this.firstname} ${this.lastname}`,
-                    to_name: "PetWatch",
-                    email_id: this.email,
-                    message: this.message,
-                }
-            ).then((result) => {
-                    console.log('SUCCESS!', result.text);
-                }, (error) => {
-                    console.log('FAILED...', error.text);
-                });
+        submitQuestions() {   
+            alert("Disabled")    
         }
     }
 };

@@ -81,7 +81,7 @@ import type UserModel from "~/types/models/user"; // Type definition for UserMod
 import type PetModel from "~/types/models/pet"; // Type definition for PetModel
 import ContactDetails from '~/components/petProfile/ContactDetails.vue'; // Custom ContactDetails component
 definePageMeta({
-    middleware: "auth" // Require authentication middleware for accessing this page
+    middleware: ["sidebase-auth"] // Require authentication middleware for accessing this page
 });
 export default {
     components: { ContactDetails }, // Registering the ContactDetails component
